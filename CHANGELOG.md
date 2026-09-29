@@ -245,6 +245,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Trap dialog focus and throttle announcer (#315) ([4ddbc31](https://github.com/darshi1337/apogee/commit/4ddbc319af73afd52a00cf92926593f177bccccd))
 - Trap dialog focus and throttle announcer (#315) (#375) ([d14c917](https://github.com/darshi1337/apogee/commit/d14c9172168e8e70b45af2c91c82679840280161))
 - Bump fast-uri to ^3.1.7 to patch GHSA-58mr-gqgx-xq4g ([c807ca1](https://github.com/darshi1337/apogee/commit/c807ca14c4b6ceb7793e0cbb5c5f04ec4e38ceea))
+- Disconnect unknown service worker ports (#341) ([c420639](https://github.com/darshi1337/apogee/commit/c42063993c88b89063983d3ad5e0c0d5cfebe9da))
 
 ## [0.2.1] - 2026-08-19
 
