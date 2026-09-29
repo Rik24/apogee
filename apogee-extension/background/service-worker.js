@@ -26,7 +26,7 @@ import {
   formatNotificationMessage,
 } from "../lib/util/userError.js";
 import { hasHostPermissions } from "../lib/util/permissions.js";
-import { disconnectIfUnknownPort } from "../lib/util/portNames.js";
+import { disconnectIfUnknownPort } from "../lib/util/streamBroadcast.js";
 import { ensureLoopbackCorsRule } from "../lib/util/loopbackCors.js";
 import {
   buildAnswerPrompt,
