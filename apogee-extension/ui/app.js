@@ -759,20 +759,29 @@ const EXTRACTOR_INFO = {
 };
 
 // Discussion threads, video, and multi-tab pages don't go through the
-// keyword-focus prompt path (see lib/summarize/ollamaSummarize.js) - a
-// visible input that silently does nothing is worse than no input, so it's
-// hidden rather than just disabled. Called from updateExtractorChip so every
-// site that resolves a page's type stays in sync automatically.
+// keyword-focus prompt path: video early-returns into summarizeYoutube
+// (no focusKeyword param), discussion buildMap/buildReduce never receive
+// it (see lib/summarize/ollamaSummarize.js), and the multi-tab synthesis
+// uses buildMultiTabSummaryPrompt (no focusKeyword param - see
+// background/service-worker.js). A visible input that silently does nothing
+// is worse than no input, so it's hidden rather than just disabled. Called
+// from updateExtractorChip so every site that resolves a page's type stays
+// in sync automatically.
+function isFocusKeywordSupportedType(type) {
+  return (
+    !isVideoType(type) &&
+    type !== "hackernews" &&
+    type !== "reddit" &&
+    type !== "stackoverflow" &&
+    type !== "multi-tab"
+  );
+}
 function updateFocusKeywordAvailability(pageData) {
   if (!focusKeywordInput) return;
-  const type = pageData?.type;
-  const hide =
-    isVideoType(type) ||
-    type === "hackernews" ||
-    type === "reddit" ||
-    type === "stackoverflow" ||
-    type === "multi-tab";
-  focusKeywordInput.classList.toggle("hidden", hide);
+  focusKeywordInput.classList.toggle(
+    "hidden",
+    !isFocusKeywordSupportedType(pageData?.type),
+  );
 }
 
 function updateExtractorChip(pageData) {
@@ -1696,7 +1705,7 @@ async function summarizeActivePage() {
   setLoadingIndicator(summaryText, randomSummarizeVerb());
 
   const jobId = `summary-${crypto.randomUUID()}`;
-  const focusKeyword = (focusKeywordInput?.value || "").trim();
+  const requestedFocusKeyword = (focusKeywordInput?.value || "").trim();
   try {
     const [tab] = await chrome.tabs.query({
       active: true,
@@ -1734,6 +1743,14 @@ async function summarizeActivePage() {
       renderError(summaryText, NOTHING_TO_SUMMARIZE_ERROR_MSG);
       return;
     }
+
+    // Gate on type support (#319): the input is hidden for video,
+    // discussion, and multi-tab pages, but a value typed before the type
+    // resolves (or left over) must not fragment the cache or ride along in
+    // job payloads the prompt path ignores.
+    const focusKeyword = isFocusKeywordSupportedType(pageData?.type)
+      ? requestedFocusKeyword
+      : "";
 
     const cacheKey = await getSummaryCacheKey(
       tab.url,
