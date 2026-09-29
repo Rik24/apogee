@@ -7,7 +7,7 @@ import {
   buildScaledBulletsStyle,
   withCustomInstructions,
 } from "./prompts.js";
-import { isVideoType } from "../constants.js";
+import { isVideoType, isDiscussionType } from "../constants.js";
 import { detectPrimaryLanguage } from "../language/detectLanguage.js";
 import { chatStream } from "../engines/ollamaClient.js";
 import { mapReduceStream } from "./mapReduce.js";
@@ -68,8 +68,7 @@ export async function* summarizeText(
     return;
   }
 
-  const isDiscussion =
-    type === "hackernews" || type === "reddit" || type === "stackoverflow";
+  const isDiscussion = isDiscussionType(type);
   const buildPrompt = isDiscussion ? buildDiscussionPrompt : buildSummaryPrompt;
 
   const postExcerpt = isDiscussion ? discussionPostExcerpt(text) : "";
