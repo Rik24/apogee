@@ -116,6 +116,16 @@ export function isVideoType(type) {
   return VIDEO_PAGE_TYPES.has(type);
 }
 
+const DISCUSSION_PAGE_TYPES = new Set([
+  "hackernews",
+  "reddit",
+  "stackoverflow",
+]);
+
+export function isDiscussionType(type) {
+  return DISCUSSION_PAGE_TYPES.has(type);
+}
+
 const DEFAULT_SUMMARY_LANGUAGE = "en";
 
 export const CUSTOM_INSTRUCTIONS_MAX_CHARS = 2000;

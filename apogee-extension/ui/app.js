@@ -26,6 +26,7 @@ import {
   PRIVATE_HOSTS_MAX_CHARS,
   MODEL_NAME_MAX_CHARS,
   isVideoType,
+  isDiscussionType,
 } from "../lib/constants.js";
 import { getSettings } from "../lib/storage/settings.js";
 import {
@@ -768,13 +769,7 @@ const EXTRACTOR_INFO = {
 // from updateExtractorChip so every site that resolves a page's type stays
 // in sync automatically.
 function isFocusKeywordSupportedType(type) {
-  return (
-    !isVideoType(type) &&
-    type !== "hackernews" &&
-    type !== "reddit" &&
-    type !== "stackoverflow" &&
-    type !== "multi-tab"
-  );
+  return !isVideoType(type) && !isDiscussionType(type) && type !== "multi-tab";
 }
 function updateFocusKeywordAvailability(pageData) {
   if (!focusKeywordInput) return;
