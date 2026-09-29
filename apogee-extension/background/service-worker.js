@@ -26,6 +26,7 @@ import {
   formatNotificationMessage,
 } from "../lib/util/userError.js";
 import { hasHostPermissions } from "../lib/util/permissions.js";
+import { disconnectIfUnknownPort } from "../lib/util/streamBroadcast.js";
 import { ensureLoopbackCorsRule } from "../lib/util/loopbackCors.js";
 import {
   buildAnswerPrompt,
@@ -1725,7 +1726,7 @@ const sidePanelPorts = new Map();
 if (typeof chrome !== "undefined" && chrome.runtime?.onConnect?.addListener) {
   chrome.runtime.onConnect.addListener((port) => {
     // Ports are same-extension by construction, but validate the sender like
-    // the onMessage handlers do; unknown-name ports are already dropped below.
+    // the onMessage handlers do; unknown-name ports are disconnected below.
     if (port.sender?.id !== chrome.runtime.id) {
       safeDisconnect(port);
       return;
@@ -1762,7 +1763,7 @@ if (typeof chrome !== "undefined" && chrome.runtime?.onConnect?.addListener) {
       return;
     }
 
-    if (!port.name.startsWith("popup-stream-")) return;
+    if (disconnectIfUnknownPort(port, safeDisconnect)) return;
     const popupPort = port;
 
     const streamId = popupPort.name.replace("popup-stream-", "");
