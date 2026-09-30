@@ -247,6 +247,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Bump fast-uri to ^3.1.7 to patch GHSA-58mr-gqgx-xq4g ([c807ca1](https://github.com/darshi1337/apogee/commit/c807ca14c4b6ceb7793e0cbb5c5f04ec4e38ceea))
 - Disconnect unknown service worker ports (#341) ([c420639](https://github.com/darshi1337/apogee/commit/c42063993c88b89063983d3ad5e0c0d5cfebe9da))
 - Gate focus keyword on page-type support (#319) ([be281c9](https://github.com/darshi1337/apogee/commit/be281c9ed19aeda65021b2ef5c546cc667d63dd7))
+- Sync input maxlengths from JS caps (#320) ([642169a](https://github.com/darshi1337/apogee/commit/642169a8510b2582aa9a57113b77a96c248e0230))
 
 ## [0.2.1] - 2026-08-19
 
