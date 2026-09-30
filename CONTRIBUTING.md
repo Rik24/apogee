@@ -36,7 +36,7 @@ Stuck halfway? Open a draft PR and ask. A half-finished branch with a clear ques
 
 ## Getting set up
 
-Use **Node 22 or newer**, which is what CI runs and what `.nvmrc` pins. Older versions differ in ways that show up as test failures which are not your fault.
+Use **Node 24 or newer**, which is what CI runs and what `.nvmrc` pins. Older versions differ in ways that show up as test failures which are not your fault.
 
 ```bash
 cd apogee-extension
