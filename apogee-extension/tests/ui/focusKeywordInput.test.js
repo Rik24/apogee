@@ -3,6 +3,11 @@ import assert from "node:assert";
 import { readFileSync } from "node:fs";
 import fs from "node:fs";
 import { parseHTML } from "linkedom";
+import {
+  CUSTOM_INSTRUCTIONS_MAX_CHARS,
+  PRIVATE_HOSTS_MAX_CHARS,
+} from "../../lib/constants.js";
+import { FOCUS_KEYWORD_MAX_CHARS } from "../../lib/summarize/prompts.js";
 
 // #161: a per-page focus keyword input. app.js relies on chrome.* tab events
 // and DOM state that this repo doesn't execute in tests (see
@@ -28,7 +33,47 @@ test("app.html declares the focus keyword input with the documented cap (#161)",
   const input = document.getElementById("focusKeywordInput");
   assert.ok(input, "#focusKeywordInput must exist in app.html");
   assert.strictEqual(input.getAttribute("type"), "text");
-  assert.strictEqual(input.getAttribute("maxlength"), "200");
+  // #320: assert against the JS cap, not a literal, so bumping
+  // FOCUS_KEYWORD_MAX_CHARS fails here instead of silently drifting.
+  assert.strictEqual(
+    input.getAttribute("maxlength"),
+    String(FOCUS_KEYWORD_MAX_CHARS),
+  );
+});
+
+test("capped settings inputs match their JS caps (#320)", () => {
+  const { document } = parseHTML(appHtmlRaw);
+  const customInstructions = document.getElementById("customInstructionsInput");
+  assert.ok(customInstructions, "#customInstructionsInput must exist");
+  assert.strictEqual(
+    customInstructions.getAttribute("maxlength"),
+    String(CUSTOM_INSTRUCTIONS_MAX_CHARS),
+  );
+  const privateHosts = document.getElementById("privateHostsInput");
+  assert.ok(privateHosts, "#privateHostsInput must exist");
+  assert.strictEqual(
+    privateHosts.getAttribute("maxlength"),
+    String(PRIVATE_HOSTS_MAX_CHARS),
+  );
+});
+
+test("app.js syncs each capped input maxlength from its JS constant (#320)", () => {
+  assert.match(
+    appCode,
+    /import \{[\s\S]*?FOCUS_KEYWORD_MAX_CHARS[\s\S]*?\} from "\.\.\/lib\/summarize\/prompts\.js"/,
+  );
+  assert.match(
+    appCode,
+    /focusKeywordInput\.maxLength\s*=\s*FOCUS_KEYWORD_MAX_CHARS/,
+  );
+  assert.match(
+    appCode,
+    /customInstructionsInput[\s\S]*?\.maxLength\s*=\s*CUSTOM_INSTRUCTIONS_MAX_CHARS/,
+  );
+  assert.match(
+    appCode,
+    /privateHostsInput[\s\S]*?\.maxLength\s*=\s*PRIVATE_HOSTS_MAX_CHARS/,
+  );
 });
 
 test("the focus keyword input is cleared on tab switch (#161)", () => {

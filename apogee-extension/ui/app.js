@@ -104,6 +104,7 @@ import { applyI18nToDom } from "../lib/util/i18n.js";
 import { safeDisconnect } from "../lib/util/streamBroadcast.js";
 import { tryParseUrl } from "../lib/util/url.js";
 import { createAnnouncer, handleTrapTabKey } from "../lib/util/a11y.js";
+import { FOCUS_KEYWORD_MAX_CHARS } from "../lib/summarize/prompts.js";
 
 async function isSidePanelOpenForTab(tabId) {
   if (!tabId || typeof chrome.runtime?.sendMessage !== "function") return false;
@@ -343,6 +344,14 @@ const historyWipeText = document.getElementById("historyWipeText");
 const historyWipeCancelBtn = document.getElementById("historyWipeCancelBtn");
 const historyWipeDeleteBtn = document.getElementById("historyWipeDeleteBtn");
 const versionText = document.getElementById("versionText");
+
+// Single source of truth for input caps lives in JS (#320): the HTML
+// maxlength attributes are fallback only, re-synced here so bumping a
+// constant updates the enforced UI limit without touching markup.
+if (focusKeywordInput) focusKeywordInput.maxLength = FOCUS_KEYWORD_MAX_CHARS;
+if (customInstructionsInput)
+  customInstructionsInput.maxLength = CUSTOM_INSTRUCTIONS_MAX_CHARS;
+if (privateHostsInput) privateHostsInput.maxLength = PRIVATE_HOSTS_MAX_CHARS;
 
 if (versionText) {
   versionText.textContent = `v${chrome.runtime.getManifest().version}`;
