@@ -348,10 +348,44 @@ const versionText = document.getElementById("versionText");
 // Single source of truth for input caps lives in JS (#320): the HTML
 // maxlength attributes are fallback only, re-synced here so bumping a
 // constant updates the enforced UI limit without touching markup.
-if (focusKeywordInput) focusKeywordInput.maxLength = FOCUS_KEYWORD_MAX_CHARS;
-if (customInstructionsInput)
-  customInstructionsInput.maxLength = CUSTOM_INSTRUCTIONS_MAX_CHARS;
-if (privateHostsInput) privateHostsInput.maxLength = PRIVATE_HOSTS_MAX_CHARS;
+function setInputMaxLength(input, maxChars) {
+  if (input) input.maxLength = maxChars;
+}
+
+function syncCappedInputMaxLengths() {
+  setInputMaxLength(focusKeywordInput, FOCUS_KEYWORD_MAX_CHARS);
+  setInputMaxLength(customInstructionsInput, CUSTOM_INSTRUCTIONS_MAX_CHARS);
+  setInputMaxLength(privateHostsInput, PRIVATE_HOSTS_MAX_CHARS);
+}
+
+syncCappedInputMaxLengths();
+
+// Shared counter + debounced-autosave wiring for the capped settings
+// inputs: the custom-instructions and private-hosts blocks were identical
+// apart from element, cap, and settings key.
+function updateCappedInputCount(input, countEl, maxChars) {
+  if (!input || !countEl) return;
+  countEl.textContent = `${input.value.length} / ${maxChars}`;
+}
+
+function wireCappedSettingsInput(input, countEl, maxChars, settingKey) {
+  if (!input) return;
+  let saveTimer = null;
+  const persist = async () => {
+    await saveSettings({
+      [settingKey]: input.value.slice(0, maxChars).trim(),
+    });
+  };
+  input.addEventListener("input", () => {
+    updateCappedInputCount(input, countEl, maxChars);
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(persist, 500);
+  });
+  input.addEventListener("blur", () => {
+    clearTimeout(saveTimer);
+    persist();
+  });
+}
 
 if (versionText) {
   versionText.textContent = `v${chrome.runtime.getManifest().version}`;
@@ -2820,56 +2854,34 @@ formatRadios.forEach((radio) => {
 });
 
 function updateCustomInstructionsCount() {
-  if (!customInstructionsCount || !customInstructionsInput) return;
-  const len = customInstructionsInput.value.length;
-  customInstructionsCount.textContent = `${len} / ${CUSTOM_INSTRUCTIONS_MAX_CHARS}`;
+  updateCappedInputCount(
+    customInstructionsInput,
+    customInstructionsCount,
+    CUSTOM_INSTRUCTIONS_MAX_CHARS,
+  );
 }
 
-if (customInstructionsInput) {
-  let customInstructionsSaveTimer = null;
-  const persistCustomInstructions = async () => {
-    const value = customInstructionsInput.value
-      .slice(0, CUSTOM_INSTRUCTIONS_MAX_CHARS)
-      .trim();
-    await saveSettings({ customInstructions: value });
-  };
-
-  customInstructionsInput.addEventListener("input", () => {
-    updateCustomInstructionsCount();
-    clearTimeout(customInstructionsSaveTimer);
-    customInstructionsSaveTimer = setTimeout(persistCustomInstructions, 500);
-  });
-  customInstructionsInput.addEventListener("blur", () => {
-    clearTimeout(customInstructionsSaveTimer);
-    persistCustomInstructions();
-  });
-}
+wireCappedSettingsInput(
+  customInstructionsInput,
+  customInstructionsCount,
+  CUSTOM_INSTRUCTIONS_MAX_CHARS,
+  "customInstructions",
+);
 
 function updatePrivateHostsCount() {
-  if (!privateHostsCount || !privateHostsInput) return;
-  const len = privateHostsInput.value.length;
-  privateHostsCount.textContent = `${len} / ${PRIVATE_HOSTS_MAX_CHARS}`;
+  updateCappedInputCount(
+    privateHostsInput,
+    privateHostsCount,
+    PRIVATE_HOSTS_MAX_CHARS,
+  );
 }
 
-if (privateHostsInput) {
-  let privateHostsSaveTimer = null;
-  const persistPrivateHosts = async () => {
-    const value = privateHostsInput.value
-      .slice(0, PRIVATE_HOSTS_MAX_CHARS)
-      .trim();
-    await saveSettings({ privateHosts: value });
-  };
-
-  privateHostsInput.addEventListener("input", () => {
-    updatePrivateHostsCount();
-    clearTimeout(privateHostsSaveTimer);
-    privateHostsSaveTimer = setTimeout(persistPrivateHosts, 500);
-  });
-  privateHostsInput.addEventListener("blur", () => {
-    clearTimeout(privateHostsSaveTimer);
-    persistPrivateHosts();
-  });
-}
+wireCappedSettingsInput(
+  privateHostsInput,
+  privateHostsCount,
+  PRIVATE_HOSTS_MAX_CHARS,
+  "privateHosts",
+);
 
 summaryLanguageSelect?.addEventListener("change", async () => {
   const settings = await saveSettings({

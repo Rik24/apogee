@@ -62,18 +62,54 @@ test("app.js syncs each capped input maxlength from its JS constant (#320)", () 
     appCode,
     /import \{[\s\S]*?FOCUS_KEYWORD_MAX_CHARS[\s\S]*?\} from "\.\.\/lib\/summarize\/prompts\.js"/,
   );
+  // One helper + one sync site, so a new capped input cannot half-wire
+  // its maxlength.
+  assert.match(appCode, /function setInputMaxLength\(input, maxChars\)/);
+  assert.match(appCode, /function syncCappedInputMaxLengths\(\)/);
+  for (const [input, cap] of [
+    ["focusKeywordInput", "FOCUS_KEYWORD_MAX_CHARS"],
+    ["customInstructionsInput", "CUSTOM_INSTRUCTIONS_MAX_CHARS"],
+    ["privateHostsInput", "PRIVATE_HOSTS_MAX_CHARS"],
+  ]) {
+    assert.ok(
+      appCode.includes(`setInputMaxLength(${input}, ${cap})`),
+      `expected setInputMaxLength(${input}, ${cap}) in syncCappedInputMaxLengths`,
+    );
+  }
+});
+
+test("capped settings counters and autosave share one helper (#320)", () => {
   assert.match(
     appCode,
-    /focusKeywordInput\.maxLength\s*=\s*FOCUS_KEYWORD_MAX_CHARS/,
+    /function updateCappedInputCount\(input, countEl, maxChars\)/,
   );
   assert.match(
     appCode,
-    /customInstructionsInput[\s\S]*?\.maxLength\s*=\s*CUSTOM_INSTRUCTIONS_MAX_CHARS/,
+    /function wireCappedSettingsInput\(input, countEl, maxChars, settingKey\)/,
   );
-  assert.match(
-    appCode,
-    /privateHostsInput[\s\S]*?\.maxLength\s*=\s*PRIVATE_HOSTS_MAX_CHARS/,
-  );
+  for (const [fnName, cap, key] of [
+    [
+      "updateCustomInstructionsCount",
+      "CUSTOM_INSTRUCTIONS_MAX_CHARS",
+      "customInstructions",
+    ],
+    ["updatePrivateHostsCount", "PRIVATE_HOSTS_MAX_CHARS", "privateHosts"],
+  ]) {
+    const fnMatch = appCode.match(
+      new RegExp(`function ${fnName}[\\s\\S]*?\\n\\}`),
+    );
+    assert.ok(fnMatch, `${fnName} function found`);
+    assert.ok(
+      fnMatch[0].includes("updateCappedInputCount(") &&
+        fnMatch[0].includes(cap),
+      `expected ${fnName} to delegate to updateCappedInputCount with ${cap}`,
+    );
+    assert.ok(
+      appCode.includes(`"${key}"`),
+      `expected wireCappedSettingsInput to persist the ${key} key`,
+    );
+  }
+  assert.doesNotMatch(appCode, /persistCustomInstructions|persistPrivateHosts/);
 });
 
 test("the focus keyword input is cleared on tab switch (#161)", () => {
