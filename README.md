@@ -178,38 +178,9 @@ Thanks to all contributors:
 
 <!-- contributors:start -->
 <!-- cspell:disable --><!-- contributor usernames are not dictionary words -->
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/darshi1337"><img src="https://github.com/darshi1337.png?size=160" width="80" alt="darshi1337" /><br />darshi1337</a></td>
-    <td align="center"><a href="https://github.com/prashantpiyush1111"><img src="https://github.com/prashantpiyush1111.png?size=160" width="80" alt="prashantpiyush1111" /><br />prashantpiyush1111</a></td>
-    <td align="center"><a href="https://github.com/mohdUwaish59"><img src="https://github.com/mohdUwaish59.png?size=160" width="80" alt="mohdUwaish59" /><br />mohdUwaish59</a></td>
-    <td align="center"><a href="https://github.com/vaishaldsouza"><img src="https://github.com/vaishaldsouza.png?size=160" width="80" alt="vaishaldsouza" /><br />vaishaldsouza</a></td>
-    <td align="center"><a href="https://github.com/chenzeyan54-commits"><img src="https://github.com/chenzeyan54-commits.png?size=160" width="80" alt="chenzeyan54-commits" /><br />chenzeyan54-commits</a></td>
-    <td align="center"><a href="https://github.com/Daniele-Cangi"><img src="https://github.com/Daniele-Cangi.png?size=160" width="80" alt="Daniele-Cangi" /><br />Daniele-Cangi</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/naba-runn"><img src="https://github.com/naba-runn.png?size=160" width="80" alt="naba-runn" /><br />naba-runn</a></td>
-    <td align="center"><a href="https://github.com/rodriveiga01"><img src="https://github.com/rodriveiga01.png?size=160" width="80" alt="rodriveiga01" /><br />rodriveiga01</a></td>
-    <td align="center"><a href="https://github.com/bcu001"><img src="https://github.com/bcu001.png?size=160" width="80" alt="bcu001" /><br />bcu001</a></td>
-    <td align="center"><a href="https://github.com/PandaHUN777"><img src="https://github.com/PandaHUN777.png?size=160" width="80" alt="PandaHUN777" /><br />PandaHUN777</a></td>
-    <td align="center"><a href="https://github.com/MayurK-cmd"><img src="https://github.com/MayurK-cmd.png?size=160" width="80" alt="MayurK-cmd" /><br />MayurK-cmd</a></td>
-    <td align="center"><a href="https://github.com/avijit-thawani"><img src="https://github.com/avijit-thawani.png?size=160" width="80" alt="avijit-thawani" /><br />avijit-thawani</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/Aarav-cyber"><img src="https://github.com/Aarav-cyber.png?size=160" width="80" alt="Aarav-cyber" /><br />Aarav-cyber</a></td>
-    <td align="center"><a href="https://github.com/amoussa1229"><img src="https://github.com/amoussa1229.png?size=160" width="80" alt="amoussa1229" /><br />amoussa1229</a></td>
-    <td align="center"><a href="https://github.com/ayushi-wq"><img src="https://github.com/ayushi-wq.png?size=160" width="80" alt="ayushi-wq" /><br />ayushi-wq</a></td>
-    <td align="center"><a href="https://github.com/GhostCoder6969"><img src="https://github.com/GhostCoder6969.png?size=160" width="80" alt="GhostCoder6969" /><br />GhostCoder6969</a></td>
-    <td align="center"><a href="https://github.com/JSP7A"><img src="https://github.com/JSP7A.png?size=160" width="80" alt="JSP7A" /><br />JSP7A</a></td>
-    <td align="center"><a href="https://github.com/Jah-yee"><img src="https://github.com/Jah-yee.png?size=160" width="80" alt="Jah-yee" /><br />Jah-yee</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/RohitSutar1823"><img src="https://github.com/RohitSutar1823.png?size=160" width="80" alt="RohitSutar1823" /><br />RohitSutar1823</a></td>
-    <td align="center"><a href="https://github.com/Gambit-Checkmate"><img src="https://github.com/Gambit-Checkmate.png?size=160" width="80" alt="Gambit-Checkmate" /><br />Gambit-Checkmate</a></td>
-    <td align="center"><a href="https://github.com/tejas5038"><img src="https://github.com/tejas5038.png?size=160" width="80" alt="tejas5038" /><br />tejas5038</a></td>
-    <td align="center"><a href="https://github.com/zenithamza"><img src="https://github.com/zenithamza.png?size=160" width="80" alt="zenithamza" /><br />zenithamza</a></td>
-  </tr>
-</table>
+<p>
+  <a href="https://github.com/darshi1337"><img src="https://github.com/darshi1337.png?size=100" width="50" alt="darshi1337" /></a> <a href="https://github.com/prashantpiyush1111"><img src="https://github.com/prashantpiyush1111.png?size=100" width="50" alt="prashantpiyush1111" /></a> <a href="https://github.com/mohdUwaish59"><img src="https://github.com/mohdUwaish59.png?size=100" width="50" alt="mohdUwaish59" /></a> <a href="https://github.com/vaishaldsouza"><img src="https://github.com/vaishaldsouza.png?size=100" width="50" alt="vaishaldsouza" /></a> <a href="https://github.com/chenzeyan54-commits"><img src="https://github.com/chenzeyan54-commits.png?size=100" width="50" alt="chenzeyan54-commits" /></a> <a href="https://github.com/Daniele-Cangi"><img src="https://github.com/Daniele-Cangi.png?size=100" width="50" alt="Daniele-Cangi" /></a> <a href="https://github.com/naba-runn"><img src="https://github.com/naba-runn.png?size=100" width="50" alt="naba-runn" /></a> <a href="https://github.com/rodriveiga01"><img src="https://github.com/rodriveiga01.png?size=100" width="50" alt="rodriveiga01" /></a> <a href="https://github.com/bcu001"><img src="https://github.com/bcu001.png?size=100" width="50" alt="bcu001" /></a> <a href="https://github.com/PandaHUN777"><img src="https://github.com/PandaHUN777.png?size=100" width="50" alt="PandaHUN777" /></a> <a href="https://github.com/MayurK-cmd"><img src="https://github.com/MayurK-cmd.png?size=100" width="50" alt="MayurK-cmd" /></a> <a href="https://github.com/avijit-thawani"><img src="https://github.com/avijit-thawani.png?size=100" width="50" alt="avijit-thawani" /></a> <a href="https://github.com/Aarav-cyber"><img src="https://github.com/Aarav-cyber.png?size=100" width="50" alt="Aarav-cyber" /></a> <a href="https://github.com/amoussa1229"><img src="https://github.com/amoussa1229.png?size=100" width="50" alt="amoussa1229" /></a> <a href="https://github.com/ayushi-wq"><img src="https://github.com/ayushi-wq.png?size=100" width="50" alt="ayushi-wq" /></a> <a href="https://github.com/GhostCoder6969"><img src="https://github.com/GhostCoder6969.png?size=100" width="50" alt="GhostCoder6969" /></a> <a href="https://github.com/JSP7A"><img src="https://github.com/JSP7A.png?size=100" width="50" alt="JSP7A" /></a> <a href="https://github.com/Jah-yee"><img src="https://github.com/Jah-yee.png?size=100" width="50" alt="Jah-yee" /></a> <a href="https://github.com/RohitSutar1823"><img src="https://github.com/RohitSutar1823.png?size=100" width="50" alt="RohitSutar1823" /></a> <a href="https://github.com/Gambit-Checkmate"><img src="https://github.com/Gambit-Checkmate.png?size=100" width="50" alt="Gambit-Checkmate" /></a> <a href="https://github.com/tejas5038"><img src="https://github.com/tejas5038.png?size=100" width="50" alt="tejas5038" /></a> <a href="https://github.com/zenithamza"><img src="https://github.com/zenithamza.png?size=100" width="50" alt="zenithamza" /></a>
+</p>
 <!-- cspell:enable -->
 <!-- contributors:end -->
 

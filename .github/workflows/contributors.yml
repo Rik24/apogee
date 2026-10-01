@@ -38,22 +38,16 @@ jobs:
           from pathlib import Path
 
           users = Path("/tmp/contributors.txt").read_text().split()
-          cells = [
-              f'    <td align="center"><a href="https://github.com/{u}">'
-              f'<img src="https://github.com/{u}.png?size=160" width="80" '
-              f'alt="{u}" /><br />{u}</a></td>'
+          tiles = " ".join(
+              f'<a href="https://github.com/{u}">'
+              f'<img src="https://github.com/{u}.png?size=100" width="50" '
+              f'alt="{u}" /></a>'
               for u in users
-          ]
-          rows = ["  <tr>"]
-          for i, cell in enumerate(cells):
-              rows.append(cell)
-              if i % 6 == 5 and i != len(cells) - 1:
-                  rows += ["  </tr>", "  <tr>"]
-          rows.append("  </tr>")
+          )
           block = (
               "<!-- contributors:start -->\n"
               "<!-- cspell:disable --><!-- contributor usernames are not dictionary words -->\n"
-              "<table>\n" + "\n".join(rows) + "\n</table>\n"
+              "<p>\n  " + tiles + "\n</p>\n"
               "<!-- cspell:enable -->\n"
               "<!-- contributors:end -->"
           )
