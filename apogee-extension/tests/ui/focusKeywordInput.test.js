@@ -112,14 +112,6 @@ test("capped settings counters and autosave share one helper (#320)", () => {
   assert.doesNotMatch(appCode, /persistCustomInstructions|persistPrivateHosts/);
 });
 
-test("the focus keyword input is cleared on tab switch (#161)", () => {
-  const onActivatedMatch = appCode.match(
-    /chrome\.tabs\.onActivated\.addListener\(\(\) => \{[\s\S]*?\n {4}\}\);/,
-  );
-  assert.ok(onActivatedMatch, "chrome.tabs.onActivated listener found");
-  assert.match(onActivatedMatch[0], /focusKeywordInput\.value = ""/);
-});
-
 test("the focus keyword input is cleared on same-tab navigation to a new URL (#161)", () => {
   const onUpdatedMatch = appCode.match(
     /chrome\.tabs\.onUpdated\.addListener\(\(tabId, changeInfo\) => \{[\s\S]*?\n\}\);/,
@@ -128,7 +120,7 @@ test("the focus keyword input is cleared on same-tab navigation to a new URL (#1
   const body = onUpdatedMatch[0];
   assert.match(body, /changeInfo\.url/);
   assert.match(body, /tabId !== activeTabId/);
-  assert.match(body, /focusKeywordInput\.value = ""/);
+  assert.match(body, /clearFocusKeyword\(\)/);
 });
 
 test("re-summarizing the same page does not clear the focus keyword (#161)", () => {
@@ -235,4 +227,33 @@ test("summarizeActivePage gates the focus keyword on page-type support (#319)", 
       "raw requestedFocusKeyword must not reach cache keys or job payloads",
     );
   }
+});
+
+test("[#370] resetting the focus keyword input in a function clearFocusKeyword() helper", () => {
+  const onActivatedMatch = appCode.match(
+    /chrome\.tabs\.onActivated\.addListener\(\(\) => \{[\s\S]*?\n {4}\}\);/,
+  );
+  const onUpdatedMatch = appCode.match(
+    /chrome\.tabs\.onUpdated\.addListener\(\([\s\S]*?\) => \{[\s\S]*?\n {2}\}\);/,
+  );
+  assert.ok(onActivatedMatch, "chrome.tabs.onActivated listener found");
+  assert.ok(onUpdatedMatch, "chrome.tabs.onUpdated listener found");
+
+  assert.match(onActivatedMatch[0], /clearFocusKeyword\(\)/);
+  assert.match(onUpdatedMatch[0], /clearFocusKeyword\(\)/);
+
+  assert.doesNotMatch(
+    onActivatedMatch[0],
+    /if \(focusKeywordInput\) focusKeywordInput\.value = ""/,
+  );
+  assert.doesNotMatch(
+    onUpdatedMatch[0],
+    /if \(focusKeywordInput\) focusKeywordInput\.value = ""/,
+  );
+
+  const helperMatch = appCode.match(
+    /function clearFocusKeyword\(\) \{[\s\S]*?\n\}/,
+  );
+  assert.ok(helperMatch, "clearFocusKeyword helper found");
+  assert.match(helperMatch[0], /focusKeywordInput\.value = ""/);
 });

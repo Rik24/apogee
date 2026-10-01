@@ -180,7 +180,7 @@ if (isSidePanelSurface) {
       // The side panel is one persistent document that survives a tab
       // switch, so a focus keyword left over from the previous page would
       // otherwise silently steer the next page's summary too.
-      if (focusKeywordInput) focusKeywordInput.value = "";
+      clearFocusKeyword();
     });
   }
 }
@@ -195,7 +195,7 @@ if (isSidePanelSurface) {
 if (typeof chrome.tabs?.onUpdated === "function") {
   chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     if (tabId !== activeTabId || !changeInfo.url) return;
-    if (focusKeywordInput) focusKeywordInput.value = "";
+    clearFocusKeyword();
   });
 }
 
@@ -359,6 +359,12 @@ function syncCappedInputMaxLengths() {
 }
 
 syncCappedInputMaxLengths();
+
+// The side panel document survives tab switches and same-tab navigations,
+// so a leftover keyword would silently steer the next summary.
+function clearFocusKeyword() {
+  if (focusKeywordInput) focusKeywordInput.value = "";
+}
 
 // Shared counter + debounced-autosave wiring for the capped settings
 // inputs: the custom-instructions and private-hosts blocks were identical
