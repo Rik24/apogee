@@ -273,6 +273,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Address review on #383 - helper body test, placement, privacy box ([db7e532](https://github.com/darshi1337/apogee/commit/db7e532aa78e6e800eb23e753eae02477dd9e4fd))
+
 ## [0.2.1] - 2026-08-19
 
 ### Added
