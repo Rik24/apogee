@@ -69,7 +69,9 @@ jobs:
           git commit -m "docs: sync changelog unreleased section [skip ci]"
           # Another sync job can push first and move main under us; rebase
           # and retry instead of failing the run.
-          for i in 1 2 3; do
+          for attempt in 1 2 3; do
+            echo "push attempt $attempt/3"
             git pull --rebase origin main && git push && break
+            git rebase --abort 2>/dev/null || true
             sleep 5
           done
