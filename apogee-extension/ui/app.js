@@ -120,11 +120,6 @@ async function isSidePanelOpenForTab(tabId) {
   }
 }
 
-// reset keyword input
-function clearFocusKeyword() {
-  if (focusKeywordInput) focusKeywordInput.value = "";
-}
-
 let sidePanelPort = null;
 function connectSidePanelPort(tabId) {
   if (!tabId || typeof chrome.runtime?.connect !== "function") return;
@@ -364,6 +359,12 @@ function syncCappedInputMaxLengths() {
 }
 
 syncCappedInputMaxLengths();
+
+// The side panel document survives tab switches and same-tab navigations,
+// so a leftover keyword would silently steer the next summary.
+function clearFocusKeyword() {
+  if (focusKeywordInput) focusKeywordInput.value = "";
+}
 
 // Shared counter + debounced-autosave wiring for the capped settings
 // inputs: the custom-instructions and private-hosts blocks were identical

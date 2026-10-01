@@ -250,4 +250,10 @@ test("[#370] resetting the focus keyword input in a function clearFocusKeyword()
     onUpdatedMatch[0],
     /if \(focusKeywordInput\) focusKeywordInput\.value = ""/,
   );
+
+  const helperMatch = appCode.match(
+    /function clearFocusKeyword\(\) \{[\s\S]*?\n\}/,
+  );
+  assert.ok(helperMatch, "clearFocusKeyword helper found");
+  assert.match(helperMatch[0], /focusKeywordInput\.value = ""/);
 });
