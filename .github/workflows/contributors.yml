@@ -3,17 +3,15 @@ name: Contributors Sync
 # Keeps the README contributors wall current. Regenerates the avatar table
 # between the contributors markers from the GitHub contributors API
 # (humans only, most commits first) and commits back when it changed.
-# Runs monthly, on demand, and after README edits. The bot commit carries
+# Runs on every push to main (any contributor merge triggers a sync),
+# weekly, and on demand. The bot commit carries
 # [skip ci] and the job ignores bot pushes, so it never loops.
 on:
   push:
     branches:
       - main
-    paths:
-      - "README.md"
-      - ".github/workflows/contributors.yml"
   schedule:
-    - cron: "0 6 1 * *"
+    - cron: "0 6 * * 1"
   workflow_dispatch:
 
 permissions:
