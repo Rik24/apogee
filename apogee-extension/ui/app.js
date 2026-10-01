@@ -120,6 +120,11 @@ async function isSidePanelOpenForTab(tabId) {
   }
 }
 
+// reset keyword input
+function clearFocusKeyword() {
+  if (focusKeywordInput) focusKeywordInput.value = "";
+}
+
 let sidePanelPort = null;
 function connectSidePanelPort(tabId) {
   if (!tabId || typeof chrome.runtime?.connect !== "function") return;
@@ -180,7 +185,7 @@ if (isSidePanelSurface) {
       // The side panel is one persistent document that survives a tab
       // switch, so a focus keyword left over from the previous page would
       // otherwise silently steer the next page's summary too.
-      if (focusKeywordInput) focusKeywordInput.value = "";
+      clearFocusKeyword();
     });
   }
 }
@@ -195,7 +200,7 @@ if (isSidePanelSurface) {
 if (typeof chrome.tabs?.onUpdated === "function") {
   chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     if (tabId !== activeTabId || !changeInfo.url) return;
-    if (focusKeywordInput) focusKeywordInput.value = "";
+    clearFocusKeyword();
   });
 }
 
