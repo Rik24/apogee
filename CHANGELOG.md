@@ -232,6 +232,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Auto-sync readme contributors wall with scheduled workflow ([62e1cff](https://github.com/darshi1337/apogee/commit/62e1cff94da2285ae0f24619fc27cfb3e961f855))
+
 ### Fixed
 
 - Byte-aware storage eviction and atomic past-summary delete ([4a62ecc](https://github.com/darshi1337/apogee/commit/4a62ecc5321f1bba94f27e06fb852d10990a76ad))
