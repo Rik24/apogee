@@ -72,4 +72,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
           git commit -m "docs: sync readme contributors wall [skip ci]"
-          git push
+          # Another sync job can push first and move main under us; rebase
+          # and retry instead of failing the run.
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            sleep 5
+          done
