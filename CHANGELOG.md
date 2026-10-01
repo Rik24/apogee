@@ -273,27 +273,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-### Fixed
-
-- Byte-aware storage eviction and atomic past-summary delete ([4a62ecc](https://github.com/darshi1337/apogee/commit/4a62ecc5321f1bba94f27e06fb852d10990a76ad))
-- Sliding stream expiry so long summaries survive cleanup ([c2ad363](https://github.com/darshi1337/apogee/commit/c2ad363c6a3be137c9e3dcd351d5448983a70df1))
-- [docs] Clarify broad host permission wording ([21032ac](https://github.com/darshi1337/apogee/commit/21032acda0ca57ec31705b270479c4ff1f47d5c8))
-- [chore] Prefix debugLog output with [apogee] ([1962a41](https://github.com/darshi1337/apogee/commit/1962a41bd4a05c2150c66200b019dc054426fce4))
-- [chore] Name the language-detect sample-size constant ([c1c2760](https://github.com/darshi1337/apogee/commit/c1c2760d1e648dcf8c08e35602f45b2cff9bf55f))
-- [test] Reuse createCollectingPort in attachToStream.test.js ([628fddd](https://github.com/darshi1337/apogee/commit/628fddd4a80d7bf6f192b1cb775700105c5dbb57))
-- [bug] Skip empty chunk broadcast at text cap ([c45e699](https://github.com/darshi1337/apogee/commit/c45e699833e94bce3b0dfd3baed822021f39e5fa))
-- Translate focus keyword input (#348) ([390dc22](https://github.com/darshi1337/apogee/commit/390dc227bc4687a6d71df543b966ee58d21d175a))
-- Trap dialog focus and throttle announcer (#315) ([4ddbc31](https://github.com/darshi1337/apogee/commit/4ddbc319af73afd52a00cf92926593f177bccccd))
-- Trap dialog focus and throttle announcer (#315) (#375) ([d14c917](https://github.com/darshi1337/apogee/commit/d14c9172168e8e70b45af2c91c82679840280161))
-- Bump fast-uri to ^3.1.7 to patch GHSA-58mr-gqgx-xq4g ([c807ca1](https://github.com/darshi1337/apogee/commit/c807ca14c4b6ceb7793e0cbb5c5f04ec4e38ceea))
-- Disconnect unknown service worker ports (#341) ([c420639](https://github.com/darshi1337/apogee/commit/c42063993c88b89063983d3ad5e0c0d5cfebe9da))
-- Gate focus keyword on page-type support (#319) ([be281c9](https://github.com/darshi1337/apogee/commit/be281c9ed19aeda65021b2ef5c546cc667d63dd7))
-- Sync input maxlengths from JS caps (#320) ([642169a](https://github.com/darshi1337/apogee/commit/642169a8510b2582aa9a57113b77a96c248e0230))
-- Patch brace-expansion and undici transitive vulnerabilities ([782c568](https://github.com/darshi1337/apogee/commit/782c568fd8c4a6851860b942bd711da9df637c13))
-- Use static shields for contributor badges in readme ([bfcc1f4](https://github.com/darshi1337/apogee/commit/bfcc1f45cb84a0e455110d38a8843e417ac7576b))
-- Self-host contributor badge svgs in readme ([4c284bd](https://github.com/darshi1337/apogee/commit/4c284bd89cbfc17ccf9d0f54c69ca7caa7579f14))
-- Self-host readme badges so every badge renders ([0542b04](https://github.com/darshi1337/apogee/commit/0542b04dacf91fa53f283757105e6bf419dc9b32))
-
 ## [0.2.1] - 2026-08-19
 
 ### Added
