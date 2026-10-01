@@ -1,0 +1,83 @@
+name: Contributors Sync
+
+# Keeps the README contributors wall current. Regenerates the avatar table
+# between the contributors markers from the GitHub contributors API
+# (humans only, most commits first) and commits back when it changed.
+# Runs monthly, on demand, and after README edits. The bot commit carries
+# [skip ci] and the job ignores bot pushes, so it never loops.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "README.md"
+      - ".github/workflows/contributors.yml"
+  schedule:
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-contributors:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Regenerate contributors table
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api "repos/${{ github.repository }}/contributors" --paginate \
+            -q '.[] | select(.type == "User") | .login' > /tmp/contributors.txt
+          python3 - <<'EOF'
+          from pathlib import Path
+
+          users = Path("/tmp/contributors.txt").read_text().split()
+          cells = [
+              f'    <td align="center"><a href="https://github.com/{u}">'
+              f'<img src="https://github.com/{u}.png?size=160" width="80" '
+              f'alt="{u}" /><br />{u}</a></td>'
+              for u in users
+          ]
+          rows = ["  <tr>"]
+          for i, cell in enumerate(cells):
+              rows.append(cell)
+              if i % 6 == 5 and i != len(cells) - 1:
+                  rows += ["  </tr>", "  <tr>"]
+          rows.append("  </tr>")
+          block = (
+              "<!-- contributors:start -->\n"
+              "<!-- cspell:disable --><!-- contributor usernames are not dictionary words -->\n"
+              "<table>\n" + "\n".join(rows) + "\n</table>\n"
+              "<!-- cspell:enable -->\n"
+              "<!-- contributors:end -->"
+          )
+
+          readme = Path("README.md")
+          text = readme.read_text()
+          start = text.index("<!-- contributors:start -->")
+          end = (
+              text.index("<!-- contributors:end -->")
+              + len("<!-- contributors:end -->")
+          )
+          readme.write_text(text[:start] + block + text[end:])
+          print(f"{len(users)} contributors in the wall")
+          EOF
+          git diff --quiet -- README.md && echo "unchanged" || echo "changed"
+
+      - name: Commit back
+        run: |
+          if git diff --quiet -- README.md; then
+            echo "Contributors wall already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: sync readme contributors wall [skip ci]"
+          git push
