@@ -251,6 +251,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Patch brace-expansion and undici transitive vulnerabilities ([782c568](https://github.com/darshi1337/apogee/commit/782c568fd8c4a6851860b942bd711da9df637c13))
 - Use static shields for contributor badges in readme ([bfcc1f4](https://github.com/darshi1337/apogee/commit/bfcc1f45cb84a0e455110d38a8843e417ac7576b))
 - Self-host contributor badge svgs in readme ([4c284bd](https://github.com/darshi1337/apogee/commit/4c284bd89cbfc17ccf9d0f54c69ca7caa7579f14))
+- Self-host readme badges so every badge renders ([0542b04](https://github.com/darshi1337/apogee/commit/0542b04dacf91fa53f283757105e6bf419dc9b32))
 
 ## [0.2.1] - 2026-08-19
 
