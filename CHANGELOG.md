@@ -278,6 +278,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Address review on #383 - helper body test, placement, privacy box ([db7e532](https://github.com/darshi1337/apogee/commit/db7e532aa78e6e800eb23e753eae02477dd9e4fd))
 - Sync contributors wall on every main push, weekly schedule ([cbfe0f5](https://github.com/darshi1337/apogee/commit/cbfe0f5aadffc2b4f4be85f882bd5317f8c025da))
 - Rebase-and-retry sync pushes to survive bot races ([40ea861](https://github.com/darshi1337/apogee/commit/40ea861ceedcab39948e2b30f999bf159ae98752))
+- No persisted credentials in contributors sync, use loop var ([e82d41b](https://github.com/darshi1337/apogee/commit/e82d41bb9b6bf92a0adb8551c3b34677757877df))
 
 ## [0.2.1] - 2026-08-19
 
