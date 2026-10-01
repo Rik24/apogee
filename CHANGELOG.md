@@ -250,6 +250,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Sync input maxlengths from JS caps (#320) ([642169a](https://github.com/darshi1337/apogee/commit/642169a8510b2582aa9a57113b77a96c248e0230))
 - Patch brace-expansion and undici transitive vulnerabilities ([782c568](https://github.com/darshi1337/apogee/commit/782c568fd8c4a6851860b942bd711da9df637c13))
 - Use static shields for contributor badges in readme ([bfcc1f4](https://github.com/darshi1337/apogee/commit/bfcc1f45cb84a0e455110d38a8843e417ac7576b))
+- Self-host contributor badge svgs in readme ([4c284bd](https://github.com/darshi1337/apogee/commit/4c284bd89cbfc17ccf9d0f54c69ca7caa7579f14))
 
 ## [0.2.1] - 2026-08-19
 
