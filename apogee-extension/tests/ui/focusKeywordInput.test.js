@@ -5,6 +5,7 @@ import fs from "node:fs";
 import { parseHTML } from "linkedom";
 import {
   CUSTOM_INSTRUCTIONS_MAX_CHARS,
+  MODEL_NAME_MAX_CHARS,
   PRIVATE_HOSTS_MAX_CHARS,
 } from "../../lib/constants.js";
 import { FOCUS_KEYWORD_MAX_CHARS } from "../../lib/summarize/prompts.js";
@@ -55,6 +56,12 @@ test("capped settings inputs match their JS caps (#320)", () => {
     privateHosts.getAttribute("maxlength"),
     String(PRIVATE_HOSTS_MAX_CHARS),
   );
+  const llamaModel = document.getElementById("llamaModelInput");
+  assert.ok(llamaModel, "#llamaModelInput must exist");
+  assert.strictEqual(
+    llamaModel.getAttribute("maxlength"),
+    String(MODEL_NAME_MAX_CHARS),
+  );
 });
 
 test("app.js syncs each capped input maxlength from its JS constant (#320)", () => {
@@ -70,6 +77,7 @@ test("app.js syncs each capped input maxlength from its JS constant (#320)", () 
     ["focusKeywordInput", "FOCUS_KEYWORD_MAX_CHARS"],
     ["customInstructionsInput", "CUSTOM_INSTRUCTIONS_MAX_CHARS"],
     ["privateHostsInput", "PRIVATE_HOSTS_MAX_CHARS"],
+    ["llamaModelInput", "MODEL_NAME_MAX_CHARS"],
   ]) {
     assert.ok(
       appCode.includes(`setInputMaxLength(${input}, ${cap})`),
