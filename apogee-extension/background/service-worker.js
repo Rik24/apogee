@@ -526,6 +526,19 @@ function relayToOffscreenStream(popupPort, streamId) {
 
   popupPort.onDisconnect.addListener(() => {
     untrackOffscreenRelay(streamId);
+    // The offscreen port's own onDisconnect only drops the subscriber — it
+    // does not stop the backing GPU/engine job. Mirror the explicit
+    // cancel-stream path so a closed popup cancels the job instead of
+    // leaving it running detached.
+    if (!terminal) {
+      chrome.runtime
+        .sendMessage({
+          target: "offscreen",
+          action: "cancel-stream",
+          payload: { streamId },
+        })
+        .catch(() => {});
+    }
     safeDisconnect(offscreenPort);
   });
 }
