@@ -398,6 +398,19 @@ function isOffscreenStream(streamId) {
   );
 }
 
+// Shared cancel forward: the explicit cancel-stream path and the relay
+// popup-disconnect path abort the backing offscreen GPU/engine job the same
+// way, so a closed popup cannot leave a detached generation running.
+function forwardCancelToOffscreen(streamId) {
+  return chrome.runtime
+    .sendMessage({
+      target: "offscreen",
+      action: "cancel-stream",
+      payload: { streamId },
+    })
+    .catch(() => {});
+}
+
 // Shared head for the ollama/llamacpp/transformers stream actions: rebuild
 // the finalize worker-side (so callers cannot forge cache keys), merge it
 // into the payload with any caller extras, and register the popup
@@ -526,18 +539,11 @@ function relayToOffscreenStream(popupPort, streamId) {
 
   popupPort.onDisconnect.addListener(() => {
     untrackOffscreenRelay(streamId);
-    // The offscreen port's own onDisconnect only drops the subscriber — it
-    // does not stop the backing GPU/engine job. Mirror the explicit
-    // cancel-stream path so a closed popup cancels the job instead of
-    // leaving it running detached.
+    // The offscreen port's own onDisconnect only drops the subscriber — a
+    // closed popup must also stop the backing job (guarded by !terminal so
+    // a finished stream isn't touched).
     if (!terminal) {
-      chrome.runtime
-        .sendMessage({
-          target: "offscreen",
-          action: "cancel-stream",
-          payload: { streamId },
-        })
-        .catch(() => {});
+      forwardCancelToOffscreen(streamId);
     }
     safeDisconnect(offscreenPort);
   });
@@ -2040,13 +2046,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case "cancel-stream": {
           const { streamId } = message.payload;
           if (isOffscreenStream(streamId)) {
-            chrome.runtime
-              .sendMessage({
-                target: "offscreen",
-                action: "cancel-stream",
-                payload: { streamId },
-              })
-              .catch(() => {});
+            forwardCancelToOffscreen(streamId);
           } else {
             const stream = activeStreams.get(streamId);
             if (stream && !stream.done) {

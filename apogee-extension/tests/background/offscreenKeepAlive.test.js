@@ -111,4 +111,22 @@ test("relay and finish paths wire tracking end to end", () => {
     swCode.includes("untrackOffscreenRelay(streamId)"),
     "stream-finished clears tracking as a safety net",
   );
+  // #387: a disconnected popup stops the backing offscreen job through the
+  // same shared forward the explicit cancel path uses — never an inline
+  // duplicate — and only while the stream hasn't finished.
+  assert.ok(
+    swCode.includes("function forwardCancelToOffscreen(streamId)"),
+    "cancel forward lives in one shared helper",
+  );
+  const popupDiscIdx = relayBody.indexOf("popupPort.onDisconnect");
+  assert.ok(popupDiscIdx !== -1, "popup disconnect handler found in relay");
+  const popupDiscBody = relayBody.slice(popupDiscIdx);
+  assert.ok(
+    popupDiscBody.includes("forwardCancelToOffscreen(streamId)"),
+    "popup disconnect cancels the offscreen job via the shared helper",
+  );
+  assert.ok(
+    popupDiscBody.includes("if (!terminal)"),
+    "popup disconnect skips cancel once the stream finished",
+  );
 });
