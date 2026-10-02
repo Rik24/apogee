@@ -280,6 +280,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Rebase-and-retry sync pushes to survive bot races ([40ea861](https://github.com/darshi1337/apogee/commit/40ea861ceedcab39948e2b30f999bf159ae98752))
 - No persisted credentials in contributors sync, use loop var ([e82d41b](https://github.com/darshi1337/apogee/commit/e82d41bb9b6bf92a0adb8551c3b34677757877df))
 - Add maxlength to llamaModelInput from MODEL_NAME_MAX_CHARS (#339) ([1a88d72](https://github.com/darshi1337/apogee/commit/1a88d72535ebfb872fe05c7129268f46299b4a51))
+- Cancel offscreen stream when relay popup disconnects ([6645c5f](https://github.com/darshi1337/apogee/commit/6645c5f2c22a441cd3f2b6e832e4c00ddbc3527f))
 - Pass focusKeyword to cache key functions on restore path (#391) ([5444aa6](https://github.com/darshi1337/apogee/commit/5444aa6ea8b542b39329143383bffdd84b37eb81))
 
 ## [0.2.1] - 2026-08-19
