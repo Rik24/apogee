@@ -279,6 +279,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Sync contributors wall on every main push, weekly schedule ([cbfe0f5](https://github.com/darshi1337/apogee/commit/cbfe0f5aadffc2b4f4be85f882bd5317f8c025da))
 - Rebase-and-retry sync pushes to survive bot races ([40ea861](https://github.com/darshi1337/apogee/commit/40ea861ceedcab39948e2b30f999bf159ae98752))
 - No persisted credentials in contributors sync, use loop var ([e82d41b](https://github.com/darshi1337/apogee/commit/e82d41bb9b6bf92a0adb8551c3b34677757877df))
+- Add maxlength to llamaModelInput from MODEL_NAME_MAX_CHARS (#339) ([1a88d72](https://github.com/darshi1337/apogee/commit/1a88d72535ebfb872fe05c7129268f46299b4a51))
 
 ## [0.2.1] - 2026-08-19
 
