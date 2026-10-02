@@ -197,44 +197,37 @@ test("the focus keyword input is hidden on discussion, video, and multi-tab page
 });
 
 test("summarizeActivePage gates the focus keyword on page-type support (#319)", () => {
+  // The trim+gate lives in getGatedFocusKeyword so the write and restore
+  // paths cannot drift; the raw input value never reaches cache keys.
+  const helperMatch = appCode.match(
+    /function getGatedFocusKeyword[\s\S]*?\n\}/,
+  );
+  assert.ok(helperMatch, "getGatedFocusKeyword helper found");
+  assert.match(
+    helperMatch[0],
+    /\(focusKeywordInput\?\.value \|\| ""\)\.trim\(\)/,
+  );
+  assert.ok(
+    helperMatch[0].includes("isFocusKeywordSupportedType("),
+    "helper gates on page-type support",
+  );
+  assert.doesNotMatch(appCode, /const requestedFocusKeyword/);
+
   const start = appCode.indexOf("async function summarizeActivePage()");
   assert.ok(start !== -1, "summarizeActivePage function found");
   const body = appCode.slice(start);
 
-  // The raw input value is read once into requestedFocusKeyword; the gated
-  // focusKeyword empties it for types whose prompt path ignores it, so a
-  // value typed before the type resolves cannot fragment the cache.
-  assert.match(
-    body,
-    /const requestedFocusKeyword = \(focusKeywordInput\?\.value \|\| ""\)\.trim\(\)/,
-  );
-  assert.doesNotMatch(
-    body,
-    /const focusKeyword = \(focusKeywordInput\?\.value/,
-  );
-  const gateIdx = body.indexOf("isFocusKeywordSupportedType(pageData");
-  assert.ok(gateIdx !== -1, "type gate on pageData found");
-  assert.match(body.slice(gateIdx, gateIdx + 200), /\? requestedFocusKeyword/);
-  assert.match(body.slice(gateIdx, gateIdx + 200), /: ""/);
-
-  // The gate must land before both cache-key call sites and the job
-  // payloads, so video/discussion jobs and keys never carry the keyword.
-  const cacheIdx = body.indexOf("getSummaryCacheKey(");
-  const promptsIdx = body.indexOf("getPromptsCacheKey(");
+  // The gate must land before the cache keys and the job payload, so
+  // video/discussion jobs and keys never carry the keyword.
+  const gateIdx = body.indexOf("getGatedFocusKeyword(pageData");
+  assert.ok(gateIdx !== -1, "gated helper used in summarizeActivePage");
+  const cacheIdx = body.indexOf("getSummaryCacheKeys(");
   const summarizeIdx = body.indexOf("provider.summarize({");
-  assert.ok(cacheIdx > gateIdx, "summary cache key computed after the gate");
-  assert.ok(promptsIdx > gateIdx, "prompts cache key computed after the gate");
+  assert.ok(cacheIdx > gateIdx, "cache keys computed after the gate");
   assert.ok(summarizeIdx > gateIdx, "summarize job sent after the gate");
 
-  // Cache keys and job payloads use the gated value, never the raw input.
-  for (const idx of [cacheIdx, promptsIdx, summarizeIdx]) {
-    const window = body.slice(idx, idx + 500);
-    assert.ok(window.includes("focusKeyword"), "gated focusKeyword used");
-    assert.ok(
-      !window.includes("requestedFocusKeyword"),
-      "raw requestedFocusKeyword must not reach cache keys or job payloads",
-    );
-  }
+  const cacheWindow = body.slice(cacheIdx, cacheIdx + 300);
+  assert.ok(cacheWindow.includes("focusKeyword"), "gated focusKeyword used");
 });
 
 test("[#370] resetting the focus keyword input in a function clearFocusKeyword() helper", () => {
@@ -264,4 +257,28 @@ test("[#370] resetting the focus keyword input in a function clearFocusKeyword()
   );
   assert.ok(helperMatch, "clearFocusKeyword helper found");
   assert.match(helperMatch[0], /focusKeywordInput\.value = ""/);
+});
+
+test("[#391] restoreTabView reuses the gated focus keyword and shared cache keys", () => {
+  const helperMatch = appCode.match(
+    /async function getSummaryCacheKeys[\s\S]*?\n\}/,
+  );
+  assert.ok(helperMatch, "getSummaryCacheKeys helper found");
+  assert.ok(
+    helperMatch[0].includes("getSummaryCacheKey("),
+    "helper computes the summary key",
+  );
+  assert.ok(
+    helperMatch[0].includes("getPromptsCacheKey("),
+    "helper computes the prompts key",
+  );
+
+  const start = appCode.indexOf("async function restoreTabView(");
+  assert.ok(start !== -1, "restoreTabView function found");
+  const body = appCode.slice(start);
+
+  const gateIdx = body.indexOf("getGatedFocusKeyword(currentPageData");
+  assert.ok(gateIdx !== -1, "gated helper used in restoreTabView");
+  const cacheIdx = body.indexOf("getSummaryCacheKeys(");
+  assert.ok(cacheIdx > gateIdx, "cache keys computed after the gate");
 });
