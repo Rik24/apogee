@@ -266,28 +266,34 @@ test("[#370] resetting the focus keyword input in a function clearFocusKeyword()
   assert.match(helperMatch[0], /focusKeywordInput\.value = ""/);
 });
 
-test("[#391] restoreTabView passes focusKeyword to getSummaryCacheKey and getPromptsCacheKey", () => {
-  const restoreMatch = appCode.match(
-    /async function restoreTabView[\s\S]*?\n {4}\}/,
+test("[#391] restoreTabView gates the focus keyword like the write path", () => {
+  const start = appCode.indexOf("async function restoreTabView(");
+  assert.ok(start !== -1, "restoreTabView function found");
+  const body = appCode.slice(start);
+
+  assert.match(
+    body,
+    /const requestedFocusKeyword = \(focusKeywordInput\?\.value \|\| ""\)\.trim\(\)/,
   );
-  assert.ok(restoreMatch, "restoreTabView function found");
-  const body = restoreMatch[0];
+  const gateIdx = body.indexOf(
+    "isFocusKeywordSupportedType(currentPageData",
+  );
+  assert.ok(gateIdx !== -1, "type gate on currentPageData found");
+  assert.match(body.slice(gateIdx, gateIdx + 200), /\? requestedFocusKeyword/);
+  assert.match(body.slice(gateIdx, gateIdx + 200), /: ""/);
 
   const cacheIdx = body.indexOf("getSummaryCacheKey(");
   const promptsIdx = body.indexOf("getPromptsCacheKey(");
-  assert.ok(cacheIdx !== -1, "getSummaryCacheKey found in restoreTabView");
-  assert.ok(promptsIdx !== -1, "getPromptsCacheKey found in restoreTabView");
+  assert.ok(cacheIdx > gateIdx, "summary cache key computed after the gate");
+  assert.ok(promptsIdx > gateIdx, "prompts cache key computed after the gate");
 
-  const cacheCall = body.slice(cacheIdx, body.indexOf(");", cacheIdx));
-  const promptsCall = body.slice(promptsIdx, body.indexOf(");", promptsIdx));
-
-  assert.ok(
-    cacheCall.includes("focusKeyword"),
-    "restore getSummaryCacheKey includes focusKeyword",
-  );
-  assert.ok(
-    promptsCall.includes("focusKeyword"),
-    "restore getPromptsCacheKey includes focusKeyword",
-  );
+  for (const idx of [cacheIdx, promptsIdx]) {
+    const window = body.slice(idx, idx + 500);
+    assert.ok(window.includes("focusKeyword"), "gated focusKeyword used");
+    assert.ok(
+      !window.includes("requestedFocusKeyword"),
+      "raw requestedFocusKeyword must not reach restore cache keys",
+    );
+  }
 });
 
