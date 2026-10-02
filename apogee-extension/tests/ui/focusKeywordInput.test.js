@@ -282,4 +282,3 @@ test("[#391] restoreTabView reuses the gated focus keyword and shared cache keys
   const cacheIdx = body.indexOf("getSummaryCacheKeys(");
   assert.ok(cacheIdx > gateIdx, "cache keys computed after the gate");
 });
-
