@@ -821,6 +821,36 @@ const EXTRACTOR_INFO = {
 function isFocusKeywordSupportedType(type) {
   return !isVideoType(type) && !isDiscussionType(type) && type !== "multi-tab";
 }
+// Gate on type support (#319): the input is hidden for video, discussion,
+// and multi-tab pages, but a value typed before the type resolves (or left
+// over) must not fragment the cache or ride along in job payloads the
+// prompt path ignores.
+function getGatedFocusKeyword(pageType) {
+  const requested = (focusKeywordInput?.value || "").trim();
+  return isFocusKeywordSupportedType(pageType) ? requested : "";
+}
+async function getSummaryCacheKeys(url, settings, model, focusKeyword) {
+  return {
+    cacheKey: await getSummaryCacheKey(
+      url,
+      settings.responseFormat,
+      model,
+      settings.summaryLanguage,
+      settings.customInstructions,
+      settings.translationEngine,
+      focusKeyword,
+    ),
+    promptsCacheKey: await getPromptsCacheKey(
+      url,
+      settings.responseFormat,
+      model,
+      settings.summaryLanguage,
+      settings.customInstructions,
+      settings.translationEngine,
+      focusKeyword,
+    ),
+  };
+}
 function updateFocusKeywordAvailability(pageData) {
   if (!focusKeywordInput) return;
   focusKeywordInput.classList.toggle(
@@ -1750,7 +1780,6 @@ async function summarizeActivePage() {
   setLoadingIndicator(summaryText, randomSummarizeVerb());
 
   const jobId = `summary-${crypto.randomUUID()}`;
-  const requestedFocusKeyword = (focusKeywordInput?.value || "").trim();
   try {
     const [tab] = await chrome.tabs.query({
       active: true,
@@ -1793,26 +1822,12 @@ async function summarizeActivePage() {
     // discussion, and multi-tab pages, but a value typed before the type
     // resolves (or left over) must not fragment the cache or ride along in
     // job payloads the prompt path ignores.
-    const focusKeyword = isFocusKeywordSupportedType(pageData?.type)
-      ? requestedFocusKeyword
-      : "";
+    const focusKeyword = getGatedFocusKeyword(pageData?.type);
 
-    const cacheKey = await getSummaryCacheKey(
+    const { cacheKey, promptsCacheKey } = await getSummaryCacheKeys(
       tab.url,
-      settings.responseFormat,
+      settings,
       model,
-      settings.summaryLanguage,
-      settings.customInstructions,
-      settings.translationEngine,
-      focusKeyword,
-    );
-    const promptsCacheKey = await getPromptsCacheKey(
-      tab.url,
-      settings.responseFormat,
-      model,
-      settings.summaryLanguage,
-      settings.customInstructions,
-      settings.translationEngine,
       focusKeyword,
     );
     const finalize = {
@@ -2422,21 +2437,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const model = getModelForSettings(settings);
-        const cacheKey = await getSummaryCacheKey(
+        const focusKeyword = getGatedFocusKeyword(currentPageData?.type);
+        const { cacheKey, promptsCacheKey } = await getSummaryCacheKeys(
           tab.url,
-          settings.responseFormat,
+          settings,
           model,
-          settings.summaryLanguage,
-          settings.customInstructions,
-          settings.translationEngine,
-        );
-        const promptsCacheKey = await getPromptsCacheKey(
-          tab.url,
-          settings.responseFormat,
-          model,
-          settings.summaryLanguage,
-          settings.customInstructions,
-          settings.translationEngine,
+          focusKeyword,
         );
         const cached = await chrome.storage.local.get([
           cacheKey,
