@@ -356,6 +356,7 @@ function syncCappedInputMaxLengths() {
   setInputMaxLength(focusKeywordInput, FOCUS_KEYWORD_MAX_CHARS);
   setInputMaxLength(customInstructionsInput, CUSTOM_INSTRUCTIONS_MAX_CHARS);
   setInputMaxLength(privateHostsInput, PRIVATE_HOSTS_MAX_CHARS);
+  setInputMaxLength(llamaModelInput, MODEL_NAME_MAX_CHARS);
 }
 
 syncCappedInputMaxLengths();
