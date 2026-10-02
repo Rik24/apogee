@@ -2422,6 +2422,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const model = getModelForSettings(settings);
+        const requestedFocusKeyword = (focusKeywordInput?.value || "").trim();
+        const focusKeyword = isFocusKeywordSupportedType(currentPageData?.type)
+          ? requestedFocusKeyword
+          : "";
         const cacheKey = await getSummaryCacheKey(
           tab.url,
           settings.responseFormat,
@@ -2429,6 +2433,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           settings.summaryLanguage,
           settings.customInstructions,
           settings.translationEngine,
+          focusKeyword,
         );
         const promptsCacheKey = await getPromptsCacheKey(
           tab.url,
@@ -2437,6 +2442,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           settings.summaryLanguage,
           settings.customInstructions,
           settings.translationEngine,
+          focusKeyword,
         );
         const cached = await chrome.storage.local.get([
           cacheKey,

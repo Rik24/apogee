@@ -265,3 +265,29 @@ test("[#370] resetting the focus keyword input in a function clearFocusKeyword()
   assert.ok(helperMatch, "clearFocusKeyword helper found");
   assert.match(helperMatch[0], /focusKeywordInput\.value = ""/);
 });
+
+test("[#391] restoreTabView passes focusKeyword to getSummaryCacheKey and getPromptsCacheKey", () => {
+  const restoreMatch = appCode.match(
+    /async function restoreTabView[\s\S]*?\n {4}\}/,
+  );
+  assert.ok(restoreMatch, "restoreTabView function found");
+  const body = restoreMatch[0];
+
+  const cacheIdx = body.indexOf("getSummaryCacheKey(");
+  const promptsIdx = body.indexOf("getPromptsCacheKey(");
+  assert.ok(cacheIdx !== -1, "getSummaryCacheKey found in restoreTabView");
+  assert.ok(promptsIdx !== -1, "getPromptsCacheKey found in restoreTabView");
+
+  const cacheCall = body.slice(cacheIdx, body.indexOf(");", cacheIdx));
+  const promptsCall = body.slice(promptsIdx, body.indexOf(");", promptsIdx));
+
+  assert.ok(
+    cacheCall.includes("focusKeyword"),
+    "restore getSummaryCacheKey includes focusKeyword",
+  );
+  assert.ok(
+    promptsCall.includes("focusKeyword"),
+    "restore getPromptsCacheKey includes focusKeyword",
+  );
+});
+
