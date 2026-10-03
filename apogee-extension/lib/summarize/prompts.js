@@ -389,6 +389,8 @@ export function buildDiscussionPrompt(
   content,
   mode,
   styleOverride,
+  isSelection = false,
+  focusKeyword = "",
 ) {
   const style = styleOverride || SUMMARY_STYLES[mode] || SUMMARY_STYLES.bullets;
   return [
@@ -415,12 +417,20 @@ export function buildDiscussionPrompt(
     "- You MAY attribute a notable point to its username when it aids clarity, but do not force it",
     "- IGNORE spam, flame, and off-topic noise; weight heavily-downvoted comments lightly",
     "- If there is little real discussion, say so plainly instead of padding",
+    ...focusKeywordClause(focusKeyword),
     "",
     "DISCUSSION TITLE:",
     fenceTitle(title),
     "",
     "DISCUSSION URL:",
     fenceUrl(url),
+    ...(isSelection
+      ? [
+          "SOURCE CONTEXT:",
+          "This summary was generated from text selected on the webpage, not the full page.",
+        ]
+      : []),
+    "",
     "",
     "SUMMARY STYLE:",
     style,

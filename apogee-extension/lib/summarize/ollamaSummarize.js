@@ -105,7 +105,16 @@ export async function* summarizeText(
           customInstructions,
         ),
       buildMap: isDiscussion
-        ? (chunk, i) => buildPrompt(title, url, withPostContext(chunk, i), mode)
+        ? (chunk, i) =>
+            buildPrompt(
+              title,
+              url,
+              withPostContext(chunk, i),
+              mode,
+              undefined,
+              isSelection,
+              focusKeyword,
+            )
         : (chunk, i, total) =>
             buildExtractNotesPrompt(title, chunk, i, total, focusKeyword),
       buildReduce: isDiscussion
@@ -118,6 +127,7 @@ export async function* summarizeText(
                 mode,
                 scaledFor(partials),
                 isSelection,
+                focusKeyword,
               ),
               customInstructions,
             )

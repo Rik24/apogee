@@ -270,7 +270,7 @@ test("summarizeText applies a focus keyword to the single-chunk prompt, the per-
   assert.match(reducePrompt, /battery pricing/);
 });
 
-test("summarizeText ignores a focus keyword for discussion-type pages (#161)", async () => {
+test("summarizeText applies a focus keyword to discussion single-chunk, map, and reduce prompts (#389)", async () => {
   const prompts = [];
   async function* chatStreamFn(_host, _model, prompt) {
     prompts.push(prompt);
@@ -291,10 +291,36 @@ test("summarizeText ignores a focus keyword for discussion-type pages (#161)", a
     ),
   );
 
-  for (const p of prompts) {
-    assert.doesNotMatch(p, /READER'S FOCUS/);
-    assert.doesNotMatch(p, /battery pricing/);
+  assert.strictEqual(prompts.length, 1);
+  assert.match(prompts[0], /READER'S FOCUS/);
+  assert.match(prompts[0], /battery pricing/);
+
+  prompts.length = 0;
+  await collectAsync(
+    summarizeText(
+      {
+        text: "Reddit discussion\n\nTitle: T\n\nComments (path [n.n] shows the reply tree):\n[1] a: hi\n[2] b: hello",
+        title: "T",
+        url: "https://reddit.com/r/x/comments/1/",
+        mode: "bullets",
+        type: "reddit",
+        focusKeyword: "battery pricing",
+      },
+      {
+        chunkTextFn: () => ["comment chunk A", "comment chunk B"],
+        chatStreamFn,
+      },
+    ),
+  );
+
+  const mapPrompts = prompts.slice(0, -1);
+  const reducePrompt = prompts[prompts.length - 1];
+  for (const p of mapPrompts) {
+    assert.match(p, /READER'S FOCUS/);
+    assert.match(p, /battery pricing/);
   }
+  assert.match(reducePrompt, /READER'S FOCUS/);
+  assert.match(reducePrompt, /battery pricing/);
 });
 
 test("summarizeText ignores a focus keyword for video pages (#161)", async () => {
