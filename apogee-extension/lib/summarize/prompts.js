@@ -221,7 +221,12 @@ export function buildScaledBulletsStyle(chunkCount) {
   return bulletsStyle(min, max);
 }
 
-export function buildSummaryPrompt(
+function buildGroundedPrompt({
+  header,
+  rules,
+  titleLabel,
+  urlLabel,
+  contentLabel,
   title,
   url,
   content,
@@ -229,33 +234,20 @@ export function buildSummaryPrompt(
   styleOverride,
   isSelection = false,
   focusKeyword = "",
-) {
+}) {
   const style = styleOverride || SUMMARY_STYLES[mode] || SUMMARY_STYLES.bullets;
   return [
-    "You are Apogee, a strict factual browser summarizer.",
-    "",
-    "Your job is to summarize ONLY the substantive information in the provided text.",
-    "Summarize as a neutral third party. Do NOT advertise, promote, or sell anything.",
+    ...header,
     "",
     "IMPORTANT RULES:",
     INJECTION_RULE,
-    "- Do NOT invent information",
-    "- Do NOT create fake titles",
-    "- Do NOT create fake authors",
-    "- Do NOT speculate",
-    "- Do NOT add opinions",
-    "- Stay grounded in the provided text",
-    "- Summarize the actual subject matter (what happened, the key facts, findings, or arguments), NOT how the content markets itself",
-    "- IGNORE and do NOT repeat promotional or non-substantive material: sponsor/ad reads, calls to action (subscribe, like, follow, comment), channel or product plugs, merchandise, teaser/hype taglines, availability/language notes, and behind-the-scenes/production notes",
-    "- Do NOT copy marketing phrasing from the title or description; restate the substance plainly",
-    "- If the text contains a transcript, base the summary on the transcript and treat any title/description as secondary context only",
-    "- If, after removing promotional material, there is not enough substance to summarize, say so plainly instead of padding with marketing copy",
+    ...rules,
     ...focusKeywordClause(focusKeyword),
     "",
-    "ARTICLE TITLE:",
+    `${titleLabel}:`,
     fenceTitle(title),
     "",
-    "ARTICLE URL:",
+    `${urlLabel}:`,
     fenceUrl(url),
     ...(isSelection
       ? [
@@ -269,9 +261,51 @@ export function buildSummaryPrompt(
     "",
     "The SUMMARY STYLE is mandatory. Follow it exactly.",
     "",
-    "ARTICLE CONTENT:",
+    `${contentLabel}:`,
     fenceContent(content),
   ].join("\n");
+}
+
+export function buildSummaryPrompt(
+  title,
+  url,
+  content,
+  mode,
+  styleOverride,
+  isSelection = false,
+  focusKeyword = "",
+) {
+  return buildGroundedPrompt({
+    header: [
+      "You are Apogee, a strict factual browser summarizer.",
+      "",
+      "Your job is to summarize ONLY the substantive information in the provided text.",
+      "Summarize as a neutral third party. Do NOT advertise, promote, or sell anything.",
+    ],
+    rules: [
+      "- Do NOT invent information",
+      "- Do NOT create fake titles",
+      "- Do NOT create fake authors",
+      "- Do NOT speculate",
+      "- Do NOT add opinions",
+      "- Stay grounded in the provided text",
+      "- Summarize the actual subject matter (what happened, the key facts, findings, or arguments), NOT how the content markets itself",
+      "- IGNORE and do NOT repeat promotional or non-substantive material: sponsor/ad reads, calls to action (subscribe, like, follow, comment), channel or product plugs, merchandise, teaser/hype taglines, availability/language notes, and behind-the-scenes/production notes",
+      "- Do NOT copy marketing phrasing from the title or description; restate the substance plainly",
+      "- If the text contains a transcript, base the summary on the transcript and treat any title/description as secondary context only",
+      "- If, after removing promotional material, there is not enough substance to summarize, say so plainly instead of padding with marketing copy",
+    ],
+    titleLabel: "ARTICLE TITLE",
+    urlLabel: "ARTICLE URL",
+    contentLabel: "ARTICLE CONTENT",
+    title,
+    url,
+    content,
+    mode,
+    styleOverride,
+    isSelection,
+    focusKeyword,
+  });
 }
 
 export function buildExtractNotesPrompt(
@@ -392,54 +426,42 @@ export function buildDiscussionPrompt(
   isSelection = false,
   focusKeyword = "",
 ) {
-  const style = styleOverride || SUMMARY_STYLES[mode] || SUMMARY_STYLES.bullets;
-  return [
-    "You are Apogee, summarizing an online discussion thread as a neutral observer.",
-    "",
-    "The thread is provided as a hierarchy of comments. Each line is one comment:",
-    "  [1], [1.1], [1.1.1] … is its path in the reply tree (so [1.1] is a reply to [1]).",
-    "  <replies: N> is how many direct replies it drew; more replies = a more significant point of discussion.",
-    "  (score: N) is the comment's net upvotes where available; higher = the community endorsed it more.",
-    "  {downvotes: N} marks a comment the community pushed back on; treat it with skepticism.",
-    "  Then the username and the comment text.",
-    "",
-    "Your job:",
-    "- Identify the main themes and arguments the discussion actually centered on.",
-    "- Represent the range of viewpoints, especially where commenters disagree, and note any rough consensus.",
-    "- Surface genuinely insightful or high-engagement sub-threads over one-off asides.",
-    "- Stay neutral: report what people argued, do not take a side or add your own opinion.",
-    "",
-    "IMPORTANT RULES:",
-    INJECTION_RULE,
-    "- Do NOT invent comments, users, or positions that are not in the thread",
-    "- Do NOT speculate beyond what was written",
-    "- Base the summary on the comments, treating the title/post as context",
-    "- You MAY attribute a notable point to its username when it aids clarity, but do not force it",
-    "- IGNORE spam, flame, and off-topic noise; weight heavily-downvoted comments lightly",
-    "- If there is little real discussion, say so plainly instead of padding",
-    ...focusKeywordClause(focusKeyword),
-    "",
-    "DISCUSSION TITLE:",
-    fenceTitle(title),
-    "",
-    "DISCUSSION URL:",
-    fenceUrl(url),
-    ...(isSelection
-      ? [
-          "SOURCE CONTEXT:",
-          "This summary was generated from text selected on the webpage, not the full page.",
-        ]
-      : []),
-    "",
-    "",
-    "SUMMARY STYLE:",
-    style,
-    "",
-    "The SUMMARY STYLE is mandatory. Follow it exactly.",
-    "",
-    "DISCUSSION THREAD:",
-    fenceContent(content),
-  ].join("\n");
+  return buildGroundedPrompt({
+    header: [
+      "You are Apogee, summarizing an online discussion thread as a neutral observer.",
+      "",
+      "The thread is provided as a hierarchy of comments. Each line is one comment:",
+      "  [1], [1.1], [1.1.1] … is its path in the reply tree (so [1.1] is a reply to [1]).",
+      "  <replies: N> is how many direct replies it drew; more replies = a more significant point of discussion.",
+      "  (score: N) is the comment's net upvotes where available; higher = the community endorsed it more.",
+      "  {downvotes: N} marks a comment the community pushed back on; treat it with skepticism.",
+      "  Then the username and the comment text.",
+      "",
+      "Your job:",
+      "- Identify the main themes and arguments the discussion actually centered on.",
+      "- Represent the range of viewpoints, especially where commenters disagree, and note any rough consensus.",
+      "- Surface genuinely insightful or high-engagement sub-threads over one-off asides.",
+      "- Stay neutral: report what people argued, do not take a side or add your own opinion.",
+    ],
+    rules: [
+      "- Do NOT invent comments, users, or positions that are not in the thread",
+      "- Do NOT speculate beyond what was written",
+      "- Base the summary on the comments, treating the title/post as context",
+      "- You MAY attribute a notable point to its username when it aids clarity, but do not force it",
+      "- IGNORE spam, flame, and off-topic noise; weight heavily-downvoted comments lightly",
+      "- If there is little real discussion, say so plainly instead of padding",
+    ],
+    titleLabel: "DISCUSSION TITLE",
+    urlLabel: "DISCUSSION URL",
+    contentLabel: "DISCUSSION THREAD",
+    title,
+    url,
+    content,
+    mode,
+    styleOverride,
+    isSelection,
+    focusKeyword,
+  });
 }
 
 export function buildYoutubeMapPrompt(title, chunk, chunkIndex, chunkTotal) {
