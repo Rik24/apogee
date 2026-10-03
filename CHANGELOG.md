@@ -282,6 +282,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Add maxlength to llamaModelInput from MODEL_NAME_MAX_CHARS (#339) ([1a88d72](https://github.com/darshi1337/apogee/commit/1a88d72535ebfb872fe05c7129268f46299b4a51))
 - Cancel offscreen stream when relay popup disconnects ([6645c5f](https://github.com/darshi1337/apogee/commit/6645c5f2c22a441cd3f2b6e832e4c00ddbc3527f))
 - Pass focusKeyword to cache key functions on restore path (#391) ([5444aa6](https://github.com/darshi1337/apogee/commit/5444aa6ea8b542b39329143383bffdd84b37eb81))
+- Apply focus keyword to discussion summaries ([8c10805](https://github.com/darshi1337/apogee/commit/8c1080558a567441117d09b82a02f113bb883cd4))
 
 ## [0.2.1] - 2026-08-19
 
