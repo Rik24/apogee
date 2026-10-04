@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert";
-import { NotificationTargetManager } from "../../lib/util/notificationTargets.js";
+import { NotificationTargetManager, NOTIFICATION_TARGET_TTL_MS, MAX_NOTIFICATION_TARGETS } from "../../lib/util/notificationTargets.js";
+
+test("notification-target limits stay pinned", () => {
+  assert.strictEqual(NOTIFICATION_TARGET_TTL_MS, 60 * 60 * 1000);
+  assert.strictEqual(MAX_NOTIFICATION_TARGETS, 50);
+});
 
 test("NotificationTargetManager stores and retrieves notification target within TTL", () => {
   const manager = new NotificationTargetManager({
