@@ -11,16 +11,19 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   sync-unreleased:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          persist-credentials: false # push below uses an explicit token remote URL
 
       - name: Install git-cliff
         run: |
@@ -58,6 +61,8 @@ jobs:
           git diff --quiet -- CHANGELOG.md && echo "unchanged" || echo "changed"
 
       - name: Commit back
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if git diff --quiet -- CHANGELOG.md; then
             echo "Changelog already current."
@@ -67,8 +72,11 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md
           git commit -m "docs: sync changelog unreleased section [skip ci]"
-          # Another sync job can push first and move main under us; rebase
-          # and retry instead of failing the run.
+          # Credentials are not persisted by checkout (artipacked), so
+          # authenticate this push explicitly. Another sync job can push
+          # first and move main under us; rebase and retry instead of
+          # failing the run.
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
           for attempt in 1 2 3; do
             echo "push attempt $attempt/3"
             git pull --rebase origin main && git push && break

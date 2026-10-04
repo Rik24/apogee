@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 permissions:
-  contents: write
+  contents: read
 
 defaults:
   run:
@@ -16,10 +16,12 @@ jobs:
   build-and-release:
     name: Build & Publish Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub Release and upload zips
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
 
@@ -28,7 +30,7 @@ jobs:
       # job would ship straight to users (zizmor cache-poisoning).
       # Releases are rare; the extra minute of npm ci is worth it.
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 24
           package-manager-cache: false
@@ -39,13 +41,21 @@ jobs:
       - name: Build and package extension
         run: npm run package
 
+      # gh CLI instead of softprops/action-gh-release: one less third-party
+      # action in the release path (zizmor superfluous-actions), same result.
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          files: |
-            apogee-*-chrome.zip
-            apogee-*-mozilla.xpi
-          generate_release_notes: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Tag name via env, never expanded into the script: ref names are
+          # attacker-controllable and would be code injection (zizmor
+          # template-injection) if interpolated with ${{ }}.
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" apogee-*-chrome.zip apogee-*-mozilla.xpi --clobber
+          else
+            gh release create "$TAG" --generate-notes --title "$TAG" apogee-*-chrome.zip apogee-*-mozilla.xpi
+          fi
 
       - name: Publish to Chrome Web Store
         if: env.CWS_CLIENT_ID != ''
