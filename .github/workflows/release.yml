@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # create the GitHub Release and upload zips
+      id-token: write # keyless Sigstore signing via GitHub OIDC
 
     steps:
       - name: Checkout repository
@@ -41,6 +42,15 @@ jobs:
       - name: Build and package extension
         run: npm run package
 
+      # Keyless signing: Fulcio issues a short-lived cert bound to this
+      # workflow's OIDC identity, Rekor logs the entry. Bundles ride along
+      # with the zips so anyone can verify provenance offline.
+      - name: Sign artifacts with Sigstore
+        run: |
+          for f in apogee-*-chrome.zip apogee-*-mozilla.xpi; do
+            npx --yes sigstore@5.0.0 sign-bundle --bundle "$f.sigstore.json" "$f"
+          done
+
       # gh CLI instead of softprops/action-gh-release: one less third-party
       # action in the release path (zizmor superfluous-actions), same result.
       - name: Create GitHub Release
@@ -52,15 +62,15 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" apogee-*-chrome.zip apogee-*-mozilla.xpi --clobber
+            gh release upload "$TAG" apogee-*-chrome.zip apogee-*-mozilla.xpi apogee-*.sigstore.json --clobber
           else
-            gh release create "$TAG" --generate-notes --title "$TAG" apogee-*-chrome.zip apogee-*-mozilla.xpi
+            gh release create "$TAG" --generate-notes --title "$TAG" apogee-*-chrome.zip apogee-*-mozilla.xpi apogee-*.sigstore.json
           fi
 
       - name: Publish to Chrome Web Store
         if: env.CWS_CLIENT_ID != ''
         run: |
-          ZIP_FILE=$(ls ../apogee-*-chrome.zip 2>/dev/null | head -n 1)
+          ZIP_FILE=$(find .. -maxdepth 1 -name 'apogee-*-chrome.zip' 2>/dev/null | head -n 1)
           if [ -z "$ZIP_FILE" ]; then
             echo "Chrome zip not found: ../apogee-*-chrome.zip"
             ls -la ../*.zip 2>/dev/null || ls -la . 2>/dev/null
