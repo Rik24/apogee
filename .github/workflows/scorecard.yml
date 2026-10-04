@@ -10,6 +10,7 @@ on:
     - cron: "30 1 * * 0"
   push:
     branches: ["main"]
+  workflow_dispatch: # manual rescan, e.g. after hardening work
 
 permissions: read-all
 
