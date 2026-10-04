@@ -70,7 +70,7 @@ jobs:
       - name: Publish to Chrome Web Store
         if: env.CWS_CLIENT_ID != ''
         run: |
-          ZIP_FILE=$(ls ../apogee-*-chrome.zip 2>/dev/null | head -n 1)
+          ZIP_FILE=$(find .. -maxdepth 1 -name 'apogee-*-chrome.zip' 2>/dev/null | head -n 1)
           if [ -z "$ZIP_FILE" ]; then
             echo "Chrome zip not found: ../apogee-*-chrome.zip"
             ls -la ../*.zip 2>/dev/null || ls -la . 2>/dev/null

@@ -1,15 +1,20 @@
-# Path-to-label map for the Labeler workflow. Keep in sync with the labels
-# that exist in the repo: bug, documentation, enhancement, extractor, test.
+# Path-to-label map for the Labeler workflow (actions/labeler v7 object
+# syntax). Keep in sync with the labels that exist in the repo: bug,
+# documentation, enhancement, extractor, test, javascript.
 documentation:
-  - "**/*.md"
-  - "docs/**"
+  - changed-files:
+      - any-glob-to-any-file: ["**/*.md", "docs/**"]
 
 extractor:
-  - "apogee-extension/content/extractors/**"
-  - "apogee-extension/tests/extractors/**"
+  - changed-files:
+      - any-glob-to-any-file:
+          - "apogee-extension/content/extractors/**"
+          - "apogee-extension/tests/extractors/**"
 
 test:
-  - "apogee-extension/tests/**"
+  - changed-files:
+      - any-glob-to-any-file: ["apogee-extension/tests/**"]
 
 javascript:
-  - "**/*.js"
+  - changed-files:
+      - any-glob-to-any-file: ["**/*.js"]
