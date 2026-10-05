@@ -45,16 +45,18 @@ jobs:
       # Keyless signing: Fulcio issues a short-lived cert bound to this
       # workflow's OIDC identity, Rekor logs the entry. Bundles ride along
       # with the zips so anyone can verify provenance offline.
-      # NOTE: `npm run package` writes the zips to the repo root
+      # NOTE: the standalone CLI moved out of the `sigstore` package (v2+
+      # has no executable) into `@sigstore/cli`; `sigstore@5.0.0 sign-bundle`
+      # fails with "could not determine executable to run".
+      # And `npm run package` writes the zips to the repo root
       # (web-ext --artifacts-dir ../), not to apogee-extension/, so locate
-      # them explicitly. (Previously the bare globs below matched nothing
-      # and v0.2.3 shipped unsigned.)
+      # them explicitly.
       - name: Sign artifacts with Sigstore
         run: |
           mapfile -t ARTIFACTS < <(find .. -maxdepth 1 \( -name 'apogee-*-chrome.zip' -o -name 'apogee-*-mozilla.xpi' \))
           if [ "${#ARTIFACTS[@]}" -eq 0 ]; then echo "no packaged artifacts found"; exit 1; fi
           for f in "${ARTIFACTS[@]}"; do
-            npx --yes sigstore@5.0.0 sign-bundle --bundle "$f.sigstore.json" "$f"
+            npx --yes @sigstore/cli@0.10.3 sign-bundle --bundle "$f.sigstore.json" "$f"
           done
 
       # gh CLI instead of softprops/action-gh-release: one less third-party
