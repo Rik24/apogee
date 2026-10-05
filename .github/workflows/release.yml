@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: read
@@ -45,9 +45,15 @@ jobs:
       # Keyless signing: Fulcio issues a short-lived cert bound to this
       # workflow's OIDC identity, Rekor logs the entry. Bundles ride along
       # with the zips so anyone can verify provenance offline.
+      # NOTE: `npm run package` writes the zips to the repo root
+      # (web-ext --artifacts-dir ../), not to apogee-extension/, so locate
+      # them explicitly. (Previously the bare globs below matched nothing
+      # and v0.2.3 shipped unsigned.)
       - name: Sign artifacts with Sigstore
         run: |
-          for f in apogee-*-chrome.zip apogee-*-mozilla.xpi; do
+          mapfile -t ARTIFACTS < <(find .. -maxdepth 1 \( -name 'apogee-*-chrome.zip' -o -name 'apogee-*-mozilla.xpi' \))
+          if [ "${#ARTIFACTS[@]}" -eq 0 ]; then echo "no packaged artifacts found"; exit 1; fi
+          for f in "${ARTIFACTS[@]}"; do
             npx --yes sigstore@5.0.0 sign-bundle --bundle "$f.sigstore.json" "$f"
           done
 
@@ -61,10 +67,13 @@ jobs:
           # template-injection) if interpolated with ${{ }}.
           TAG: ${{ github.ref_name }}
         run: |
+          shopt -s nullglob
+          ARTIFACTS=( ../apogee-*-chrome.zip ../apogee-*-mozilla.xpi ../apogee-*.sigstore.json )
+          if [ "${#ARTIFACTS[@]}" -eq 0 ]; then echo "no artifacts to release"; exit 1; fi
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" apogee-*-chrome.zip apogee-*-mozilla.xpi apogee-*.sigstore.json --clobber
+            gh release upload "$TAG" "${ARTIFACTS[@]}" --clobber
           else
-            gh release create "$TAG" --generate-notes --title "$TAG" apogee-*-chrome.zip apogee-*-mozilla.xpi apogee-*.sigstore.json
+            gh release create "$TAG" --generate-notes --title "$TAG" "${ARTIFACTS[@]}"
           fi
 
       - name: Publish to Chrome Web Store
