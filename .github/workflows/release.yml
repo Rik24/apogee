@@ -44,12 +44,14 @@ jobs:
 
       # Keyless signing with Cosign: Fulcio issues a short-lived cert bound
       # to this workflow's OIDC identity, Rekor logs the entry. Produces a
-      # detached .sig + .pem (cert) per artifact so anyone can verify offline
-      # with `cosign verify-blob`.
+      # Sigstore bundle per artifact so anyone can verify offline with
+      # `cosign verify-blob --bundle`.
       # NOTE: the JS route is dead — the `sigstore` npm package (v2+) ships
       # no executable, and its successor `@sigstore/cli` dropped the `sign`
       # commands entirely (attest/verify only). Cosign is the maintained
-      # path for signing release blobs in CI.
+      # path for signing release blobs in CI. (Cosign v3 removed the old
+      # --output-signature/--output-certificate flags; --bundle is the
+      # replacement and emits the new bundle format.)
       # And `npm run package` writes the zips to the repo root
       # (web-ext --artifacts-dir ../), not to apogee-extension/, so locate
       # them explicitly.
@@ -61,7 +63,7 @@ jobs:
           mapfile -t ARTIFACTS < <(find .. -maxdepth 1 \( -name 'apogee-*-chrome.zip' -o -name 'apogee-*-mozilla.xpi' \))
           if [ "${#ARTIFACTS[@]}" -eq 0 ]; then echo "no packaged artifacts found"; exit 1; fi
           for f in "${ARTIFACTS[@]}"; do
-            cosign sign-blob --yes --output-signature "$f.sig" --output-certificate "$f.pem" "$f"
+            cosign sign-blob --yes --bundle "$f.sigstore.json" "$f"
           done
 
       # gh CLI instead of softprops/action-gh-release: one less third-party
@@ -75,7 +77,7 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           shopt -s nullglob
-          ARTIFACTS=( ../apogee-*-chrome.zip ../apogee-*-mozilla.xpi ../apogee-*.sig ../apogee-*.pem )
+          ARTIFACTS=( ../apogee-*-chrome.zip ../apogee-*-mozilla.xpi ../apogee-*.sigstore.json )
           if [ "${#ARTIFACTS[@]}" -eq 0 ]; then echo "no artifacts to release"; exit 1; fi
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "${ARTIFACTS[@]}" --clobber
