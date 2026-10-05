@@ -13,6 +13,8 @@
  * the CSRF defenses of other local services stay intact.
  */
 
+import { withTimeout } from "./withTimeout.js";
+
 export const LOOPBACK_CORS_STATIC_RULE_ID = 1;
 
 const LOOPBACK_CORS_SESSION_RULE_ID = 1;
@@ -93,8 +95,7 @@ export function resetLoopbackCorsRuleForTests() {
  * failure. Never rejects.
  */
 export function ensureLoopbackCorsRuleSoon(timeoutMs = 750) {
-  return Promise.race([
-    ensureLoopbackCorsRule(),
-    new Promise((resolve) => setTimeout(() => resolve("timeout"), timeoutMs)),
-  ]);
+  return withTimeout(ensureLoopbackCorsRule(), timeoutMs, {
+    onTimeout: () => "timeout",
+  });
 }
