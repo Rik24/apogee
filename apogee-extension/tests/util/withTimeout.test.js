@@ -28,5 +28,8 @@ test("withTimeout resolves the onTimeout fallback value", async () => {
 });
 
 test("withTimeout rejects with a generic error without onTimeout", async () => {
-  await assert.rejects(() => withTimeout(new Promise(() => {}), 20), /Timed out/);
+  await assert.rejects(
+    () => withTimeout(new Promise(() => {}), 20),
+    /Timed out/,
+  );
 });
