@@ -53,3 +53,14 @@ export function broadcastToStream(stream, msg) {
     safePost(port, msg);
   }
 }
+
+// Shared terminal-port teardown (#351): expiry and cancel both drop every
+// subscriber at once instead of leaving ports open. Copies the set for the
+// same mid-iteration mutation reason as broadcast, then clears it so the
+// disconnected ports are gone even if an onDisconnect handler never runs.
+export function disconnectStreamPorts(stream) {
+  for (const port of [...stream.subscribers]) {
+    safeDisconnect(port);
+  }
+  stream.subscribers.clear();
+}
