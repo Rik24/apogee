@@ -21,6 +21,7 @@ import {
 import { initDebugLogging } from "../lib/util/log.js";
 import {
   broadcastToStream,
+  disconnectStreamPorts,
   safeDisconnect,
   safePost,
 } from "../lib/util/streamBroadcast.js";
@@ -468,9 +469,7 @@ const streamExpiry = createSlidingExpiry({
     const stream = streams.get(streamId);
     if (!stream) return;
     streams.delete(streamId);
-    for (const port of [...stream.subscribers]) {
-      safeDisconnect(port);
-    }
+    disconnectStreamPorts(stream);
   },
 });
 function scheduleStreamCleanup(streamId) {
@@ -774,6 +773,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             stream.done = true;
             stream.text = "";
             broadcastToStream(stream, { type: "cancelled" });
+            disconnectStreamPorts(stream);
             scheduleStreamCleanup(message.payload.streamId);
             try {
               stream.controller?.abort();
