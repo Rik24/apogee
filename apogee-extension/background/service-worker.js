@@ -1789,7 +1789,7 @@ if (typeof chrome !== "undefined" && chrome.runtime?.onConnect?.addListener) {
       return;
     }
 
-    if (disconnectIfUnknownPort(port, safeDisconnect)) return;
+    if (disconnectIfUnknownPort(port)) return;
     const popupPort = port;
 
     const streamId = popupPort.name.replace("popup-stream-", "");
