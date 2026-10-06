@@ -2,7 +2,7 @@ import { chunkText } from "../summarize/chunk.js";
 import { embedTexts as embedTextsDefault, dot } from "../engines/embeddings.js";
 import { cyrb53 } from "../util/hash.js";
 
-const RETRIEVAL_CHUNK_CHARS = 1000;
+export const RETRIEVAL_CHUNK_CHARS = 1000;
 const DEFAULT_MAX_CONTEXT_CHARS = 6000;
 const DEFAULT_TOP_K = 8;
 

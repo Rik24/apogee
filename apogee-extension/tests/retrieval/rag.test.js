@@ -6,6 +6,7 @@ import {
   findBestPassage,
   selectSalientChunks,
   ragIndexCacheKey,
+  RETRIEVAL_CHUNK_CHARS,
 } from "../../lib/retrieval/rag.js";
 
 function fakeEmbed(texts) {
@@ -14,6 +15,10 @@ function fakeEmbed(texts) {
     return [lower.includes("banana") ? 1 : 0, lower.includes("carrot") ? 1 : 0];
   });
 }
+
+test("RETRIEVAL_CHUNK_CHARS pins the split size", () => {
+  assert.strictEqual(RETRIEVAL_CHUNK_CHARS, 1000);
+});
 
 test("retrieveRelevantContent returns short content unchanged without embedding", async () => {
   const content = "Short page content.";
