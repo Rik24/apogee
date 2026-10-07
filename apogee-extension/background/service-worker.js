@@ -213,8 +213,18 @@ function registerStreamJob(streamId, jobData) {
 // without limit; entries are dropped oldest-first.
 export const pendingFinalizeRetries = new Map();
 const MAX_PENDING_FINALIZE_RETRIES = 10;
+const MAX_PENDING_FINALIZE_AGE_MS = 5 * 60 * 1000;
+
+export function evictExpiredPendingFinalizes(now = Date.now()) {
+  for (const [jobId, entry] of pendingFinalizeRetries) {
+    if (now - entry.savedAt >= MAX_PENDING_FINALIZE_AGE_MS) {
+      pendingFinalizeRetries.delete(jobId);
+    }
+  }
+}
 
 export function preservePendingFinalize({ finalize, model, title, url, text }) {
+  evictExpiredPendingFinalizes();
   const jobId = finalize?.jobId || finalize?.cacheKey || `${Date.now()}`;
   if (pendingFinalizeRetries.has(jobId)) {
     pendingFinalizeRetries.delete(jobId);
@@ -235,6 +245,7 @@ export function preservePendingFinalize({ finalize, model, title, url, text }) {
 }
 
 export function takePendingFinalize(jobId) {
+  evictExpiredPendingFinalizes();
   const entry = pendingFinalizeRetries.get(jobId);
   if (entry) pendingFinalizeRetries.delete(jobId);
   return entry || null;
