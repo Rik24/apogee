@@ -216,15 +216,20 @@ function registerStreamJob(streamId, jobData) {
 
 // Summaries that finished generating but could not be persisted (e.g. storage
 // quota). Kept in memory so the text survives for a retry even when every
-// storage write is rejecting. Bounded so a quota-stuck browser cannot grow it
-// without limit; entries are dropped oldest-first.
+// storage write is rejecting. Bounded by count and age so a quota-stuck browser
+// cannot grow it without limit; entries are dropped oldest-first and entries
+// older than MAX_PENDING_FINALIZE_AGE_MS are evicted lazily on preserve/take.
 export const pendingFinalizeRetries = new Map();
 const MAX_PENDING_FINALIZE_RETRIES = 10;
 const MAX_PENDING_FINALIZE_AGE_MS = 5 * 60 * 1000;
 
 export function evictExpiredPendingFinalizes(now = Date.now()) {
   for (const [jobId, entry] of pendingFinalizeRetries) {
-    if (now - entry.savedAt >= MAX_PENDING_FINALIZE_AGE_MS) {
+    const savedAt = Number(entry?.savedAt);
+    if (
+      !Number.isFinite(savedAt) ||
+      now - savedAt >= MAX_PENDING_FINALIZE_AGE_MS
+    ) {
       pendingFinalizeRetries.delete(jobId);
     }
   }

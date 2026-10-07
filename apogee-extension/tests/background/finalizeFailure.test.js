@@ -226,6 +226,24 @@ test("takePendingFinalize does not return expired entries", () => {
   }
 });
 
+test("pending finalize without timestamp is evicted", () => {
+  pendingFinalizeRetries.clear();
+
+  const now = 1_000_000;
+
+  pendingFinalizeRetries.set("job-no-timestamp", {
+    text: "summary without timestamp",
+  });
+
+  evictExpiredPendingFinalizes(now);
+
+  assert.strictEqual(
+    pendingFinalizeRetries.has("job-no-timestamp"),
+    false,
+    "entry without savedAt is evicted",
+  );
+});
+
 test("fire-and-forget finalize call sites are awaited with catch handlers (#265)", () => {
   const swCode = fs.readFileSync(
     new URL("../../background/service-worker.js", import.meta.url),
