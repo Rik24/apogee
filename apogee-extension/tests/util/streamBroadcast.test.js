@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert";
 import {
   broadcastToStream,
+  disconnectStreamPorts,
   KNOWN_PORT_NAMES,
   KNOWN_PORT_PREFIXES,
   disconnectIfUnknownPort,
@@ -108,3 +109,45 @@ test("missing or malformed port names are treated as unknown", () => {
 });
 
 assert.deepStrictEqual(KNOWN_PORT_NAMES, ["popup-lifecycle"]);
+
+test("disconnectStreamPorts drops every port and clears the set", () => {
+  const stream = createStreamState();
+  const disconnected = [];
+  for (let i = 0; i < 3; i++) {
+    const port = createCollectingPort();
+    const origDisconnect = port.disconnect.bind(port);
+    port.disconnect = () => {
+      disconnected.push(port);
+      origDisconnect();
+    };
+    stream.subscribers.add(port);
+  }
+
+  disconnectStreamPorts(stream);
+
+  assert.strictEqual(disconnected.length, 3, "every port disconnected");
+  assert.strictEqual(stream.subscribers.size, 0, "subscriber set cleared");
+});
+
+test("disconnectStreamPorts tolerates a throwing port", () => {
+  const stream = createStreamState();
+  const good = createCollectingPort();
+  let goodDisconnected = false;
+  const origDisconnect = good.disconnect.bind(good);
+  good.disconnect = () => {
+    goodDisconnected = true;
+    origDisconnect();
+  };
+  stream.subscribers.add(good);
+  stream.subscribers.add(createCollectingPort({ throwOnPost: true }));
+  // Throwing fake only throws on post; make disconnect throw like a dead port.
+  const bad = [...stream.subscribers][1];
+  bad.disconnect = () => {
+    throw new Error("Port disconnected");
+  };
+
+  disconnectStreamPorts(stream);
+
+  assert.strictEqual(goodDisconnected, true, "live port still disconnected");
+  assert.strictEqual(stream.subscribers.size, 0, "subscriber set cleared");
+});

@@ -117,8 +117,8 @@ test("offscreen extends cleanup on chunk progress and schedules at creation", ()
     "offscreen schedules cleanup when the stream is created",
   );
   assert.ok(
-    code.includes("for (const port of [...stream.subscribers])"),
-    "offscreen expiry disconnect copies the subscriber set",
+    code.includes("disconnectStreamPorts(stream)"),
+    "offscreen expiry and cancel share the disconnect helper",
   );
   assert.ok(
     EXPECTED_EXPIRED_FRAGMENTS.every((fragment) => code.includes(fragment)),

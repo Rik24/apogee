@@ -100,6 +100,7 @@ import {
   safePost,
 } from "../lib/util/streamBroadcast.js";
 import { tryParseUrl } from "../lib/util/url.js";
+import { withTimeout } from "../lib/util/withTimeout.js";
 import {
   saveViewState,
   saveViewStateIfJobMatches,
@@ -185,12 +186,18 @@ async function ensureOffscreenDocumentOnce() {
     justification: "WebGPU-based LLM inference via @mlc-ai/web-llm",
   });
 
-  offscreenReady = true;
+  offscreenReady = false;
 
-  await Promise.race([
-    offscreenScriptReadyPromise,
-    new Promise((resolve) => setTimeout(resolve, 8000)),
-  ]);
+  await withTimeout(offscreenScriptReadyPromise, 8000, {
+    onTimeout: () => {
+      throw new Error(
+        "Offscreen document did not signal ready within 8 seconds. " +
+          "Reload the extension and retry.",
+      );
+    },
+  });
+
+  offscreenReady = true;
 
   if (!popupConnected) scheduleOffscreenIdleClose();
 }
@@ -1793,7 +1800,7 @@ if (typeof chrome !== "undefined" && chrome.runtime?.onConnect?.addListener) {
       return;
     }
 
-    if (disconnectIfUnknownPort(port, safeDisconnect)) return;
+    if (disconnectIfUnknownPort(port)) return;
     const popupPort = port;
 
     const streamId = popupPort.name.replace("popup-stream-", "");
