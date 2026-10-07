@@ -68,7 +68,6 @@ const {
   finalizeSummaryJob,
   pendingFinalizeRetries,
   takePendingFinalize,
-  evictExpiredPendingFinalizes,
   FINALIZE_FAILED_MESSAGE,
 } = await import("../../background/service-worker.js");
 
@@ -162,15 +161,15 @@ test("fresh pending finalize is not evicted before TTL", () => {
 
   const now = 1_000_000;
 
-  pendingFinalizeRetries.set("job-fresh", {
-    text: "fresh summary",
-    savedAt: now - 5 * 60 * 1000 + 1,
-  });
-
-  evictExpiredPendingFinalizes(now);
+  pendingFinalizeRetries.set(
+    "job-fresh",
+    { text: "fresh summary" },
+    now - 5 * 60 * 1000 + 1,
+  );
+  pendingFinalizeRetries.evictStale(now);
 
   assert.strictEqual(
-    pendingFinalizeRetries.has("job-fresh"),
+    pendingFinalizeRetries.has("job-fresh", now),
     true,
     "fresh pending finalize remains before TTL",
   );
@@ -181,15 +180,15 @@ test("expired pending finalize is evicted after TTL", () => {
 
   const now = 1_000_000;
 
-  pendingFinalizeRetries.set("job-expired", {
-    text: "expired summary",
-    savedAt: now - 5 * 60 * 1000,
-  });
-
-  evictExpiredPendingFinalizes(now);
+  pendingFinalizeRetries.set(
+    "job-expired",
+    { text: "expired summary" },
+    now - 5 * 60 * 1000,
+  );
+  pendingFinalizeRetries.evictStale(now);
 
   assert.strictEqual(
-    pendingFinalizeRetries.has("job-expired"),
+    pendingFinalizeRetries.has("job-expired", now),
     false,
     "expired pending finalize is evicted",
   );
@@ -200,47 +199,21 @@ test("takePendingFinalize does not return expired entries", () => {
 
   const now = 1_000_000;
 
-  pendingFinalizeRetries.set("job-expired-take", {
-    text: "expired summary",
-    savedAt: now - 5 * 60 * 1000,
-  });
-
-  const originalNow = Date.now;
-  Date.now = () => now;
-
-  try {
-    const taken = takePendingFinalize("job-expired-take");
-
-    assert.strictEqual(
-      taken,
-      null,
-      "expired pending finalize cannot be taken for retry",
-    );
-    assert.strictEqual(
-      pendingFinalizeRetries.has("job-expired-take"),
-      false,
-      "expired entry is removed",
-    );
-  } finally {
-    Date.now = originalNow;
-  }
-});
-
-test("pending finalize without timestamp is evicted", () => {
-  pendingFinalizeRetries.clear();
-
-  const now = 1_000_000;
-
-  pendingFinalizeRetries.set("job-no-timestamp", {
-    text: "summary without timestamp",
-  });
-
-  evictExpiredPendingFinalizes(now);
+  pendingFinalizeRetries.set(
+    "job-expired-take",
+    { text: "expired summary" },
+    now - 5 * 60 * 1000,
+  );
 
   assert.strictEqual(
-    pendingFinalizeRetries.has("job-no-timestamp"),
+    takePendingFinalize("job-expired-take", now),
+    null,
+    "expired pending finalize cannot be taken for retry",
+  );
+  assert.strictEqual(
+    pendingFinalizeRetries.has("job-expired-take", now),
     false,
-    "entry without savedAt is evicted",
+    "expired entry is removed",
   );
 });
 

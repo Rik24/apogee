@@ -75,3 +75,67 @@ test("NotificationTargetManager delete and clear work as expected", () => {
   manager.clear();
   assert.strictEqual(manager.size, 0);
 });
+
+test("NotificationTargetManager take removes entries and honors TTL", () => {
+  const manager = new NotificationTargetManager({
+    ttlMs: 1000,
+    maxCapacity: 5,
+  });
+  const now = 1_000_000;
+
+  manager.set("take-1", { tabId: 1 }, now);
+  assert.strictEqual(manager.take("take-1", now)?.tabId, 1);
+  assert.strictEqual(manager.has("take-1", now), false);
+  assert.strictEqual(manager.take("missing", now), null);
+
+  manager.set("take-expired", { tabId: 2 }, now - 1000);
+  assert.strictEqual(manager.take("take-expired", now), null);
+  assert.strictEqual(manager.has("take-expired", now), false);
+});
+
+test("NotificationTargetManager treats entries at the TTL boundary as expired", () => {
+  const manager = new NotificationTargetManager({
+    ttlMs: 1000,
+    maxCapacity: 5,
+  });
+  const now = 1_000_000;
+
+  manager.set("fresh", { tabId: 1 }, now - 999);
+  manager.set("old", { tabId: 2 }, now - 1000);
+  manager.evictStale(now);
+
+  assert.strictEqual(manager.has("fresh", now), true);
+  assert.strictEqual(manager.has("old", now), false);
+});
+
+test("NotificationTargetManager evicts entries without timestamps", () => {
+  const manager = new NotificationTargetManager({
+    ttlMs: 1000,
+    maxCapacity: 5,
+  });
+  const now = 1_000_000;
+
+  manager.targets.set("corrupt", { tabId: 1 });
+  manager.evictStale(now);
+
+  assert.strictEqual(manager.has("corrupt", now), false);
+});
+
+test("NotificationTargetManager re-setting an entry refreshes recency", () => {
+  const manager = new NotificationTargetManager({
+    ttlMs: 60000,
+    maxCapacity: 3,
+  });
+  const now = 1_000_000;
+
+  manager.set("id-1", { tabId: 1 }, now);
+  manager.set("id-2", { tabId: 2 }, now);
+  manager.set("id-3", { tabId: 3 }, now);
+  manager.set("id-1", { tabId: 1 }, now);
+  manager.set("id-4", { tabId: 4 }, now);
+
+  assert.strictEqual(manager.has("id-2", now), false);
+  assert.strictEqual(manager.has("id-1", now), true);
+  assert.strictEqual(manager.has("id-3", now), true);
+  assert.strictEqual(manager.has("id-4", now), true);
+});

@@ -216,51 +216,27 @@ function registerStreamJob(streamId, jobData) {
 
 // Summaries that finished generating but could not be persisted (e.g. storage
 // quota). Kept in memory so the text survives for a retry even when every
-// storage write is rejecting. Bounded by count and age so a quota-stuck browser
-// cannot grow it without limit; entries are dropped oldest-first and entries
-// older than MAX_PENDING_FINALIZE_AGE_MS are evicted lazily on preserve/take.
-export const pendingFinalizeRetries = new Map();
+// storage write is rejecting. Bounded by count and age via
+// NotificationTargetManager so a quota-stuck browser cannot grow it without
+// limit; expiry is lazy on preserve/take.
 const MAX_PENDING_FINALIZE_RETRIES = 10;
 const MAX_PENDING_FINALIZE_AGE_MS = 5 * 60 * 1000;
+export const pendingFinalizeRetries = new NotificationTargetManager({
+  ttlMs: MAX_PENDING_FINALIZE_AGE_MS,
+  maxCapacity: MAX_PENDING_FINALIZE_RETRIES,
+});
 
-export function evictExpiredPendingFinalizes(now = Date.now()) {
-  for (const [jobId, entry] of pendingFinalizeRetries) {
-    const savedAt = Number(entry?.savedAt);
-    if (
-      !Number.isFinite(savedAt) ||
-      now - savedAt >= MAX_PENDING_FINALIZE_AGE_MS
-    ) {
-      pendingFinalizeRetries.delete(jobId);
-    }
-  }
-}
-
-export function preservePendingFinalize({ finalize, model, title, url, text }) {
-  evictExpiredPendingFinalizes();
-  const jobId = finalize?.jobId || finalize?.cacheKey || `${Date.now()}`;
-  if (pendingFinalizeRetries.has(jobId)) {
-    pendingFinalizeRetries.delete(jobId);
-  }
-  while (pendingFinalizeRetries.size >= MAX_PENDING_FINALIZE_RETRIES) {
-    const oldest = pendingFinalizeRetries.keys().next().value;
-    pendingFinalizeRetries.delete(oldest);
-  }
-  pendingFinalizeRetries.set(jobId, {
-    finalize,
-    model,
-    title,
-    url,
-    text,
-    savedAt: Date.now(),
-  });
+export function preservePendingFinalize(
+  { finalize, model, title, url, text },
+  now = Date.now(),
+) {
+  const jobId = finalize?.jobId || finalize?.cacheKey || `${now}`;
+  pendingFinalizeRetries.set(jobId, { finalize, model, title, url, text }, now);
   return jobId;
 }
 
-export function takePendingFinalize(jobId) {
-  evictExpiredPendingFinalizes();
-  const entry = pendingFinalizeRetries.get(jobId);
-  if (entry) pendingFinalizeRetries.delete(jobId);
-  return entry || null;
+export function takePendingFinalize(jobId, now = Date.now()) {
+  return pendingFinalizeRetries.take(jobId, now);
 }
 
 export const FINALIZE_FAILED_MESSAGE =
